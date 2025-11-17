@@ -22,5 +22,4 @@ object ShooterConstants {
   const val OUTTAKE_VOLTAGE = 6.0
   val SHOOTER_VELOCITY_TARGET = RotationsPerSecond.of(4000.0 / 60.0)
   const val DETECTION_TARGET_MM = 50.0
-
 }

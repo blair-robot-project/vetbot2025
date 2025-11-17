@@ -3,23 +3,20 @@ package frc.team449.subsystems.shooter
 import au.grapplerobotics.LaserCan
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
-import com.ctre.phoenix6.signals.GravityTypeValue
 import com.revrobotics.spark.SparkMax
-import edu.wpi.first.units.measure.Angle
 import edu.wpi.first.units.measure.AngularVelocity
-import edu.wpi.first.units.measure.Velocity
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.createFollowerSpark
 import frc.team449.system.motor.createKraken
 import frc.team449.system.motor.createSparkMax
 
-class Shooter (
+class Shooter(
   val intakeLeader: SparkMax,
   val intakeFollower: SparkMax,
   val shooterMotor: TalonFX,
   val sensor: LaserCan
-): SubsystemBase() {
+) : SubsystemBase() {
 
   fun setShooterVelocity(velocity: AngularVelocity): Command {
     return runOnce {

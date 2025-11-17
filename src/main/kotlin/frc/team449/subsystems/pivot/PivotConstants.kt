@@ -1,8 +1,8 @@
-package frc.team449.subsystems.intake_pivot
+package frc.team449.subsystems.pivot
 
 import edu.wpi.first.units.Units.*
 
-object IntakePivotConstants {
+object PivotConstants {
   const val PIVOT_ID = 3 // TODO: find
   const val PIVOT_INVERTED = false // TODO: find
   const val PIVOT_KP = 1.0

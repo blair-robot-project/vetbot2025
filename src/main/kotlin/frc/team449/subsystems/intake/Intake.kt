@@ -14,7 +14,7 @@ class Intake(
   val wheelFollower: SparkMax,
   val pieceSensor: LaserCan,
   val rollerMotor: TalonFX
-  ): SubsystemBase() {
+) : SubsystemBase() {
 
   fun intake(): Command {
     return runOnce {
