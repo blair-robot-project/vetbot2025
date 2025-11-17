@@ -49,6 +49,7 @@ class IntakePivot (
       val pivotMotor = createKraken(
         IntakePivotConstants.PIVOT_ID,
         IntakePivotConstants.PIVOT_INVERTED,
+        sensorToMech = IntakePivotConstants.PIVOT_SENSOR_TO_MECH,
         kS = IntakePivotConstants.PIVOT_KS,
         kV = IntakePivotConstants.PIVOT_KV,
         kA = IntakePivotConstants.PIVOT_KA,
