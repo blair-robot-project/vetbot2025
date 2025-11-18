@@ -7,14 +7,31 @@ import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Angle
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj.util.Color8Bit
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.createKraken
 
 @Logged
-class Pivot(
-  val pivotMotor: TalonFX
+open class Pivot(
+  val pivotMotor: TalonFX,
 ) : SubsystemBase() {
+
+  val pivotMechanism2d = Mechanism2d(3.0, 3.0, Color8Bit(0, 0,0))
+  val pivotRoot = pivotMechanism2d.getRoot("pivotRoot", 0.25, 0.25)
+  val pivotLigament = pivotRoot.append(
+    MechanismLigament2d(
+      "pivotLigament",
+      2.0,
+      0.0,
+      3.0,
+      Color8Bit(0, 255, 0)
+    )
+  )
 
   fun setPosition(position: Angle): Command {
     return runOnce {
@@ -44,8 +61,13 @@ class Pivot(
     }
   }
 
+  override fun periodic() {
+    pivotLigament.angle = pivotMotor.position.value.`in`(Degrees)
+    SmartDashboard.putData("Pivot", pivotMechanism2d)
+  }
+
   companion object {
-    fun createIntakePivot() {
+    fun createIntakePivot(): Pivot {
       val pivotMotor = createKraken(
         PivotConstants.PIVOT_ID,
         PivotConstants.PIVOT_INVERTED,
@@ -61,6 +83,7 @@ class Pivot(
         cruiseVel = PivotConstants.PIVOT_CRUISE_VEL.`in`(RotationsPerSecond),
         maxAccel = PivotConstants.PIVOT_MAX_ACCEL.`in`(RotationsPerSecondPerSecond)
       )
+      return Pivot(pivotMotor)
     }
   }
 }

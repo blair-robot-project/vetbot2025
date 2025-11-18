@@ -15,4 +15,7 @@ object PivotConstants {
   const val PIVOT_SENSOR_TO_MECH = 11.0 / 3.0
   val PIVOT_CRUISE_VEL = RotationsPerSecond.of(1.0)
   val PIVOT_MAX_ACCEL = RotationsPerSecondPerSecond.of(1.0)
+
+  val INTAKE_POSITION = Degrees.of(0.0)
+  val STOW_POSITION = Degrees.of(89.273)
 }
