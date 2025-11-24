@@ -78,12 +78,12 @@ class Intake(
     )
   }
 
-  fun outtake(voltageSupplier: Supplier<Double>): Command {
+  fun outtake(): Command {
     return Commands.sequence(
       runOnce {
         conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
         firstIndexer.setVoltage(IntakeConstants.FIRST_INDEXER_VOLTAGE)
-        shooterMotor.setVoltage(voltageSupplier.get())
+        shooterMotor.setVoltage(IntakeConstants.SHOOTER_VOLTAGE)
       },
       WaitCommand(1.0),
       WaitUntilCommand { piecesShot() },

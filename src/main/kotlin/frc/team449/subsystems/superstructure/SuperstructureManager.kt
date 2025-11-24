@@ -48,7 +48,6 @@ class SuperstructureManager(
 ) {
 
   private var command = "stow"
-  private val shootingVoltageSupplier = Supplier { poseSubsystem.getPower() }
   private val trackingSupplier = Supplier { poseSubsystem.trackGoal() }
   @Logged(name = "current command")
   fun logCommand(): String {
@@ -84,9 +83,19 @@ class SuperstructureManager(
     )
   }
 
+  fun stopTrack(): Command {
+    return Commands.sequence(
+      driveCommand.stopTracking(),
+      InstantCommand ({ command = "nothing" })
+    )
+  }
+
   fun outtake(): Command {
     return Commands.sequence(
-      intake.outtake(shootingVoltageSupplier)
+      stopTrack(),
+      InstantCommand({ command = "outtaking "}),
+      intake.outtake(),
+      InstantCommand ({ command = "nothing" })
     )
   }
 
