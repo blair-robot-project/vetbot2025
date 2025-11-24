@@ -8,13 +8,17 @@ import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.units.Units.Radians
+import edu.wpi.first.units.measure.Angle
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.RunCommand
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.vision.PoseSubsystem
+import java.util.function.Supplier
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.*
 
@@ -41,7 +45,9 @@ class SwerveOrthogonalCommand(
   private val allianceCompensation = { if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) PI else 0.0 }
   private val directionCompensation = { if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) -1.0 else 1.0 }
 
+  var stayAtAngle = false
   var headingLock = false
+  var trackingAngleSupplier: Supplier<Angle> = Supplier { Radians.of(0.0) }
 
   private var rotRamp = SlewRateLimiter(RobotConstants.ROT_RATE_LIMIT)
 
@@ -62,6 +68,10 @@ class SwerveOrthogonalCommand(
     addRequirements(drive)
     rotCtrl.enableContinuousInput(-PI, PI)
     rotCtrl.setTolerance(RobotConstants.SNAP_TO_ANGLE_TOLERANCE_RAD)
+  }
+
+  fun setTrackSupplier(supplier: Supplier<Angle>) {
+    trackingAngleSupplier = supplier
   }
 
   override fun initialize() {
@@ -105,6 +115,20 @@ class SwerveOrthogonalCommand(
     RunCommand({ snapToAngle(angle) })
       .until(::checkSnapToAngleTolerance)
       .andThen(::exitSnapToAngle)
+
+  fun trackAngle(): Command {
+    return InstantCommand({
+      headingLock = true
+      stayAtAngle = true
+    })
+  }
+
+  fun stopTracking(): Command {
+    return InstantCommand ({
+      headingLock = false
+      stayAtAngle = false }
+    )
+  }
 
   override fun execute() {
     val currTime = timer.get()
@@ -167,7 +191,12 @@ class SwerveOrthogonalCommand(
           ) * -sign(controller.rightX) * drive.maxRotSpeed,
         )
       } else {
-        if (checkSnapToAngleTolerance()) headingLock = false
+        if (!stayAtAngle) {
+          if (checkSnapToAngleTolerance()) headingLock = false
+        } else {
+          val desAngle = MathUtil.angleModulus(trackingAngleSupplier.get().`in`(Radians) + allianceCompensation.invoke())
+          rotCtrl.calculate(poseEstimator.heading.radians, desAngle)
+        }
 
         MathUtil.clamp(
           rotCtrl.calculate(poseEstimator.heading.radians),

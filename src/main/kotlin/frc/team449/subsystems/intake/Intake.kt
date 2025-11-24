@@ -13,17 +13,19 @@ import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import com.ctre.phoenix6.signals.InvertedValue
 import frc.team449.system.motor.createFollowerSpark
+import frc.team449.system.motor.createKraken
 import frc.team449.system.motor.createSparkMax
+import java.util.function.Supplier
 
 class Intake(
-  val intakeLeader: TalonFX,
-  val firstIndexer: SparkMax,
-  val secondIndexer: SparkMax,
-  val conveyorMotor: SparkMax,
-  shooterMotor: TalonFX,
-  val rightSensor: LaserCanInterface,
-  val leftSensor: LaserCanInterface,
-  val shooterSensor: LaserCanInterface
+  private val intakeLeader: TalonFX,
+  private val firstIndexer: SparkMax,
+  private val secondIndexer: SparkMax,
+  private val conveyorMotor: SparkMax,
+  private val shooterMotor: TalonFX,
+  private val rightSensor: LaserCanInterface,
+  private val leftSensor: LaserCanInterface,
+  private val shooterSensor: LaserCanInterface
   ): SubsystemBase() {
 
   private val sensors =
@@ -76,14 +78,16 @@ class Intake(
     )
   }
 
-  fun outtake(): Command {
+  fun outtake(voltageSupplier: Supplier<Double>): Command {
     return Commands.sequence(
       runOnce {
         conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
         firstIndexer.setVoltage(IntakeConstants.FIRST_INDEXER_VOLTAGE)
+        shooterMotor.setVoltage(voltageSupplier.get())
       },
       WaitCommand(1.0),
       WaitUntilCommand { piecesShot() },
+      WaitCommand(0.1),
       stop()
     )
   }
@@ -102,21 +106,13 @@ class Intake(
   }
 
   companion object {
-    fun boolToInversion(inversion: Boolean): InvertedValue {
-      if(inversion) {
-        return InvertedValue.CounterClockwise_Positive
-      }
-      return InvertedValue.Clockwise_Positive
-    }
     fun createIntake(): Intake {
 
-      val config = TalonFXConfiguration()
-      config.MotorOutput.withInverted(boolToInversion(IntakeConstants.INTAKE_LEADER_INVERTED))
-      val intakeLeader = TalonFX(
+      val intakeLeader = createKraken(
         IntakeConstants.INTAKE_LEADER_ID,
+        IntakeConstants.INTAKE_LEADER_INVERTED
       )
 
-      intakeLeader.configurator.apply(config)
       val intakeFollower = TalonFX(
         IntakeConstants.INTAKE_FOLLOWER_ID
       )
@@ -149,11 +145,10 @@ class Intake(
         IntakeConstants.CONVEYOR_INVERTED
       )
 
-      config.MotorOutput.withInverted(boolToInversion(IntakeConstants.SHOOTER_INVERTED))
-      val shooterMotor = TalonFX(
+      val shooterMotor = createKraken(
         IntakeConstants.SHOOTER_ID,
+        IntakeConstants.SHOOTER_INVERTED
       )
-      shooterMotor.configurator.apply(config)
 
       val rightSensor = LaserCan(
         IntakeConstants.RIGHT_SENSOR_ID

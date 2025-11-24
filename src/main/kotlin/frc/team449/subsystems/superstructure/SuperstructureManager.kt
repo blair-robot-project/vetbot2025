@@ -2,15 +2,19 @@ package frc.team449.subsystems.superstructure
 
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.epilogue.NotLogged
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.team449.Robot
 import frc.team449.subsystems.drive.swerve.SwerveDrive
+import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
 import frc.team449.subsystems.intake.Intake
 import frc.team449.subsystems.pivot.Pivot
 import frc.team449.subsystems.vision.PoseSubsystem
+import java.util.function.Supplier
 
 /*
 * pivot goes down
@@ -34,6 +38,8 @@ class SuperstructureManager(
   @NotLogged
   private val drive: SwerveDrive,
   @NotLogged
+  private val driveCommand: SwerveOrthogonalCommand,
+  @NotLogged
   private val poseSubsystem: PoseSubsystem,
   @NotLogged
   private val intake: Intake,
@@ -42,16 +48,52 @@ class SuperstructureManager(
 ) {
 
   private var command = "stow"
-
+  private val shootingVoltageSupplier = Supplier { poseSubsystem.getPower() }
+  private val trackingSupplier = Supplier { poseSubsystem.trackGoal() }
   @Logged(name = "current command")
   fun logCommand(): String {
     return command
   }
 
+  fun moveToIntake(): Command {
+    return Commands.sequence(
+      InstantCommand ({ command = "moving to intake" }),
+      pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
+      WaitUntilCommand { pivot.atSetpoint() },
+      pivot.hold(),
+      InstantCommand ({ command = "nothing" }),
+    )
+  }
+
   fun intake(): Command {
     return Commands.sequence(
-      InstantCommand ({ command = "inaking" })
+      InstantCommand ({ command = "intaking" }),
+      intake.intake(),
+      InstantCommand ({ command = "nothing" })
+    )
+  }
 
+  fun stow(): Command {
+    return Commands.sequence(
+      InstantCommand ({ command = "stowing" }),
+      driveCommand.stopTracking(),
+      pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
+      WaitUntilCommand { pivot.atSetpoint() },
+      pivot.hold(),
+      InstantCommand ({ command = "nothing" })
+    )
+  }
+
+  fun outtake(): Command {
+    return Commands.sequence(
+      intake.outtake(shootingVoltageSupplier)
+    )
+  }
+
+  fun autoAim(): Command {
+    return Commands.sequence(
+      InstantCommand({ command = "tracking "}),
+      driveCommand.trackAngle()
     )
   }
 
@@ -59,6 +101,7 @@ class SuperstructureManager(
     fun createSuperstructureManager(robot: Robot): SuperstructureManager {
       return SuperstructureManager(
         robot.drive,
+        robot.driveCommand,
         robot.poseSubsystem,
         robot.intake,
         robot.pivot

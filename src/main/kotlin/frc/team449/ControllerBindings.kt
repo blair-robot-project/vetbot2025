@@ -55,9 +55,8 @@ class ControllerBindings(
 
   // povDown
   private fun stow() {
-    driveController.povDown().onTrue(
-      robot.superstructureManager
-        .requestGoal(SuperstructureGoal.STOW)
+    driveController.a().onTrue(
+      robot.superstructureManager.stow()
     )
   }
 

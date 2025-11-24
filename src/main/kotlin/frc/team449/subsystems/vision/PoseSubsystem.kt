@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.units.Units.Degrees
+import edu.wpi.first.units.measure.Angle
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
@@ -112,6 +114,14 @@ class PoseSubsystem(
     if (cameras.isNotEmpty()) localize()
 
     setRobotPose()
+  }
+
+  fun getPower(): Double {
+    return 0.0
+  }
+
+  fun trackGoal(): Angle {
+    return Degrees.of(0.0)
   }
 
   private fun localize() = try {
