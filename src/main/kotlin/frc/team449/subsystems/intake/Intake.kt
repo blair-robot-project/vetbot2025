@@ -1,65 +1,179 @@
 package frc.team449.subsystems.intake
 
 import au.grapplerobotics.LaserCan
+import au.grapplerobotics.interfaces.LaserCanInterface
+import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.spark.SparkMax
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
+import com.ctre.phoenix6.signals.InvertedValue
 import frc.team449.system.motor.createFollowerSpark
-import frc.team449.system.motor.createKraken
 import frc.team449.system.motor.createSparkMax
 
 class Intake(
-  val wheelLeader: SparkMax,
-  val wheelFollower: SparkMax,
-  val pieceSensor: LaserCan,
-  val rollerMotor: TalonFX
-) : SubsystemBase() {
+  val intakeLeader: TalonFX,
+  val firstIndexer: SparkMax,
+  val secondIndexer: SparkMax,
+  val conveyorMotor: SparkMax,
+  shooterMotor: TalonFX,
+  val rightSensor: LaserCanInterface,
+  val leftSensor: LaserCanInterface,
+  val shooterSensor: LaserCanInterface
+  ): SubsystemBase() {
+
+  private val sensors =
+    listOf(
+      leftSensor,
+      rightSensor,
+      shooterSensor,
+    )
+
+  private var allSensorsConfigured = true
+  private var lasercanConfigured = listOf<Boolean>()
+
+  init {
+    try {
+      for (sensor in sensors) {
+        sensor.setTimingBudget(LaserCanInterface.TimingBudget.TIMING_BUDGET_33MS)
+        sensor.setRegionOfInterest(LaserCanInterface.RegionOfInterest(8, 8, 4, 4))
+        sensor.setRangingMode(LaserCanInterface.RangingMode.SHORT)
+        lasercanConfigured.plus(true)
+      }
+    } catch (_: Exception) {
+      lasercanConfigured.plus(false)
+      allSensorsConfigured = false
+    }
+    shooterMotor.setVoltage(IntakeConstants.SHOOTER_VOLTAGE)
+  }
+
+  private fun detectsPiece(sensor: LaserCanInterface): Boolean {
+    val measurement = sensor.measurement
+    return measurement != null && (
+      measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT &&
+        measurement.distance_mm <= IntakeConstants.CORAL_DETECTION_THRESHOLD
+      )
+  }
+
+  private fun pieceIntaken(): Boolean {
+    return detectsPiece(rightSensor) || detectsPiece(leftSensor)
+  }
 
   fun intake(): Command {
-    return runOnce {
-      rollerMotor.setVoltage(IntakeConstants.ROLLER_INTAKE_VOLTAGE)
-      wheelLeader.setVoltage(IntakeConstants.WHEEL_INTAKE_VOLTAGE)
-    }
+    return Commands.sequence(
+      runOnce {
+        intakeLeader.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
+        firstIndexer.setVoltage(IntakeConstants.FIRST_INDEXER_VOLTAGE)
+        conveyorMotor.setVoltage(IntakeConstants.CONVEYOR_INTAKE_VOLTAGE)
+      },
+      WaitUntilCommand { pieceIntaken() },
+      WaitCommand(0.5),
+      stop()
+    )
   }
 
   fun outtake(): Command {
-    return runOnce {
-      rollerMotor.setVoltage(IntakeConstants.ROLLER_OUTTAKE_VOLTAGE)
-      wheelLeader.setVoltage(IntakeConstants.WHEEL_OUTTAKE_VOLTAGE)
-    }
+    return Commands.sequence(
+      runOnce {
+        conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
+        firstIndexer.setVoltage(IntakeConstants.FIRST_INDEXER_VOLTAGE)
+      },
+      WaitCommand(1.0),
+      WaitUntilCommand { piecesShot() },
+      stop()
+    )
   }
 
-  fun stop(): Command {
+  fun piecesShot(): Boolean {
+    return detectsPiece(shooterSensor)
+  }
+
+  private fun stop(): Command {
     return runOnce {
-      rollerMotor.stopMotor()
-      wheelLeader.stopMotor()
+      conveyorMotor.stopMotor()
+      intakeLeader.stopMotor()
+      firstIndexer.stopMotor()
+      secondIndexer.stopMotor()
     }
   }
 
   companion object {
+    fun boolToInversion(inversion: Boolean): InvertedValue {
+      if(inversion) {
+        return InvertedValue.CounterClockwise_Positive
+      }
+      return InvertedValue.Clockwise_Positive
+    }
     fun createIntake(): Intake {
-      val wheelLeader = createSparkMax(
-        IntakeConstants.WHEEL_LEADER_ID,
-        IntakeConstants.WHEEL_LEADER_INVERTED,
+
+      val config = TalonFXConfiguration()
+      config.MotorOutput.withInverted(boolToInversion(IntakeConstants.INTAKE_LEADER_INVERTED))
+      val intakeLeader = TalonFX(
+        IntakeConstants.INTAKE_LEADER_ID,
       )
-      val wheelFollower = createFollowerSpark(
-        IntakeConstants.WHEEL_FOLLOWER_ID,
-        wheelLeader,
-        IntakeConstants.WHEEL_FOLLOWER_INVERSION
+
+      intakeLeader.configurator.apply(config)
+      val intakeFollower = TalonFX(
+        IntakeConstants.INTAKE_FOLLOWER_ID
       )
-      val rollerMotor = createKraken(
-        IntakeConstants.ROLLER_ID,
-        IntakeConstants.ROLLER_INVERTED,
+      intakeFollower.setControl(
+        Follower(IntakeConstants.INTAKE_LEADER_ID, IntakeConstants.INTAKE_FOLLOWER_INVERSION)
       )
-      val pieceSensor = LaserCan(
-        IntakeConstants.SENSOR_ID
+
+      val firstIndexerLeaderMotor = createSparkMax(
+        IntakeConstants.FIRST_INDEXER_LEADER_ID,
+        IntakeConstants.FIRST_INDEXER_LEADER_INVERTED,
       )
+      val firstIndexerFollowerMotor = createFollowerSpark(
+        IntakeConstants.FIRST_INDEXER_FOLLOWER_ID,
+        firstIndexerLeaderMotor,
+        IntakeConstants.FIRST_INDEXER_FOLLOWER_INVERSION,
+      )
+
+      val secondIndexerLeaderMotor = createSparkMax(
+        IntakeConstants.SECOND_INDEXER_LEADER_ID,
+        IntakeConstants.SECOND_INDEXER_LEADER_INVERTED,
+      )
+      val secondIndexerFollowerMotor = createFollowerSpark(
+        IntakeConstants.SECOND_INDEXER_FOLLOWER_ID,
+        secondIndexerLeaderMotor,
+        IntakeConstants.SECOND_INDEXER_FOLLOWER_INVERSION,
+      )
+
+      val conveyorMotor = createSparkMax(
+        IntakeConstants.CONVEYOR_ID,
+        IntakeConstants.CONVEYOR_INVERTED
+      )
+
+      config.MotorOutput.withInverted(boolToInversion(IntakeConstants.SHOOTER_INVERTED))
+      val shooterMotor = TalonFX(
+        IntakeConstants.SHOOTER_ID,
+      )
+      shooterMotor.configurator.apply(config)
+
+      val rightSensor = LaserCan(
+        IntakeConstants.RIGHT_SENSOR_ID
+      )
+      val leftSensor = LaserCan(
+        IntakeConstants.LEFT_SENSOR_ID
+      )
+      val shooterSensor = LaserCan(
+        IntakeConstants.SHOOTER_SENSOR_ID
+      )
+
       return Intake(
-        wheelLeader,
-        wheelFollower,
-        pieceSensor,
-        rollerMotor
+        intakeLeader,
+        firstIndexerLeaderMotor,
+        secondIndexerLeaderMotor,
+        conveyorMotor,
+        shooterMotor,
+        rightSensor,
+        leftSensor,
+        shooterSensor
       )
     }
   }

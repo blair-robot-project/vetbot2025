@@ -11,6 +11,11 @@ object SuperstructureGoal {
     "Stow"
   )
 
+  val INTAKE = SuperstructureState(
+    DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED),
+    "Intake"
+  )
+
   data class SuperstructureState(
     val driveDynamics: DriveDynamics,
     val name: String

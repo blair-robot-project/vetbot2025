@@ -4,54 +4,64 @@ import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.epilogue.NotLogged
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import frc.team449.Robot
 import frc.team449.subsystems.drive.swerve.SwerveDrive
+import frc.team449.subsystems.intake.Intake
+import frc.team449.subsystems.pivot.Pivot
 import frc.team449.subsystems.vision.PoseSubsystem
+
+/*
+* pivot goes down
+* pivot goes to stow
+* you run intake
+* run the conveyor a little to make sure it goes in
+* count the number of pieces in superstructure
+* RUN FLYWHEELS WHOLE TIME (its good)
+* don't run index whole time
+* when they click shoot:
+* run conveyor and run
+* ONE ON CONVEYOR
+* TWO FOR INDEXOR (one running opposite way )
+* ONE FOR SHOOTER (its like connected or smth)
+* TWO FOR INTAKE (one running oppposite)
+* TWO FOR PIVOT
+* */
 
 @Logged
 class SuperstructureManager(
   @NotLogged
   private val drive: SwerveDrive,
   @NotLogged
-  private val poseSubsystem: PoseSubsystem
+  private val poseSubsystem: PoseSubsystem,
+  @NotLogged
+  private val intake: Intake,
+  @NotLogged
+  private val pivot: Pivot
 ) {
 
-  private var requestedGoal = SuperstructureGoal.STOW
-  private var lastCompletedGoal = SuperstructureGoal.STOW
-  private var ready = false
+  private var command = "stow"
 
-  fun requestGoal(goal: SuperstructureGoal.SuperstructureState): Command {
-    return InstantCommand({ SuperstructureGoal.applyDriveDynamics(drive, goal.driveDynamics) })
-      .andThen(InstantCommand({ ready = false }))
-      .andThen(InstantCommand({ requestedGoal = goal }))
-      .andThen(InstantCommand({ lastCompletedGoal = goal }))
-      .andThen(InstantCommand({ ready = true }))
+  @Logged(name = "current command")
+  fun logCommand(): String {
+    return command
   }
 
-  @Logged(name = "requested goal")
-  fun getRequestedGoalForLog(): String {
-    return requestedGoal.name
-  }
+  fun intake(): Command {
+    return Commands.sequence(
+      InstantCommand ({ command = "inaking" })
 
-  @Logged(name = "last completed goal")
-  fun getLastCompletedGoalForLog(): String {
-    return requestedGoal.name
-  }
-
-  fun isAtPos(): Boolean {
-    return ready
-  }
-
-  fun lastCompletedGoal(): SuperstructureGoal.SuperstructureState {
-    return lastCompletedGoal
+    )
   }
 
   companion object {
     fun createSuperstructureManager(robot: Robot): SuperstructureManager {
       return SuperstructureManager(
         robot.drive,
-        robot.poseSubsystem
+        robot.poseSubsystem,
+        robot.intake,
+        robot.pivot
       )
     }
   }

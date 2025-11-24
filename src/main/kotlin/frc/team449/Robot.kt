@@ -9,8 +9,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 import frc.team449.subsystems.drive.swerve.SwerveOrthogonalCommand
+import frc.team449.subsystems.intake.Intake
+import frc.team449.subsystems.intake.Intake.Companion.createIntake
 import frc.team449.subsystems.light.Light.Companion.createLight
 import frc.team449.subsystems.pivot.Pivot
+import frc.team449.subsystems.pivot.Pivot.Companion.createPivot
 import frc.team449.subsystems.superstructure.SuperstructureManager
 import frc.team449.subsystems.superstructure.SuperstructureManager.Companion.createSuperstructureManager
 import frc.team449.subsystems.vision.PoseSubsystem
@@ -49,8 +52,6 @@ class Robot {
   @get:NotLogged
   val drive: SwerveDrive = SwerveDrive.createSwerveKraken(field)
 
-  val pivot: Pivot = Pivot.createIntakePivot()
-
   val autoChooser = AutoChooser()
 
   @get:NotLogged
@@ -58,6 +59,12 @@ class Robot {
 
   @get:NotLogged
   val driveCommand: SwerveOrthogonalCommand = SwerveOrthogonalCommand(drive, poseSubsystem, driveController.hid)
+
+  @get:NotLogged
+  val intake: Intake = createIntake()
+
+  @get:NotLogged
+  val pivot: Pivot = createPivot()
 
   @get:NotLogged
   val superstructureManager: SuperstructureManager = createSuperstructureManager(this)
