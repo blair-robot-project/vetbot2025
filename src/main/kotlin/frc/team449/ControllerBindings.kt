@@ -28,11 +28,9 @@ class ControllerBindings(
 
   private fun robotBindings() {
     stow()
-    toIntake()
     intake()
-    track()
-    stopTrack()
-    outtake()
+    highOuttake()
+    lowOuttake()
   }
 
   private fun characterizationBindings() {
@@ -60,14 +58,8 @@ class ControllerBindings(
   }
 
   private fun stow() {
-    driveController.y().onTrue(
+    driveController.b().onTrue(
       robot.superstructureManager.stow()
-    )
-  }
-
-  private fun toIntake() {
-    driveController.a().onTrue(
-      robot.superstructureManager.moveToIntake()
     )
   }
 
@@ -77,23 +69,18 @@ class ControllerBindings(
     )
   }
 
-  private fun outtake() {
-    driveController.b().onTrue(
-      robot.superstructureManager.outtake()
+  private fun lowOuttake() {
+    driveController.a().onTrue(
+      robot.superstructureManager.outtakeLow()
     )
   }
 
-  private fun stopTrack() {
-    driveController.povDown().onTrue(
-      robot.superstructureManager.stopTrack()
+  private fun highOuttake() {
+    driveController.y().onTrue(
+      robot.superstructureManager.outtakeHigh()
     )
   }
 
-  private fun track() {
-    driveController.povRight().onTrue(
-      robot.superstructureManager.autoAim()
-    )
-  }
 
   private fun slowDrive() {
     driveController

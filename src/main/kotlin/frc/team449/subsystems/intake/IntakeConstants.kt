@@ -30,6 +30,9 @@ object IntakeConstants {
   const val CONVEYOR_INTAKE_VOLTAGE = 4.0
   const val FIRST_INDEXER_VOLTAGE = 5.0
   const val SECOND_INDEXER_VOLTAGE = 5.0
+
   const val CORAL_DETECTION_THRESHOLD = 50
-  const val SHOOTER_VOLTAGE = 5.0
+
+  const val SHOOTER_HIGH_VOLTAGE = 8.0
+  const val SHOOTER_LOW_VOLTAGE = 3.0
 }

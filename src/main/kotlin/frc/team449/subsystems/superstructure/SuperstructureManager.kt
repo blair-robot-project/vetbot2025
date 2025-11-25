@@ -40,41 +40,38 @@ class SuperstructureManager(
   @NotLogged
   private val driveCommand: SwerveOrthogonalCommand,
   @NotLogged
-  private val poseSubsystem: PoseSubsystem,
-  @NotLogged
   private val intake: Intake,
   @NotLogged
   private val pivot: Pivot
 ) {
 
   private var command = "stow"
-  private val trackingSupplier = Supplier { poseSubsystem.trackGoal() }
   @Logged(name = "current command")
   fun logCommand(): String {
     return command
   }
 
-  fun moveToIntake(): Command {
+  fun intake(): Command {
     return Commands.sequence(
-      InstantCommand ({ command = "moving to intake" }),
+      InstantCommand ({
+        SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.INTAKE.driveDynamics)
+        command = "moving to intake"
+      }),
       pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
       WaitUntilCommand { pivot.atSetpoint() },
       pivot.hold(),
-      InstantCommand ({ command = "nothing" }),
-    )
-  }
-
-  fun intake(): Command {
-    return Commands.sequence(
       InstantCommand ({ command = "intaking" }),
       intake.intake(),
-      InstantCommand ({ command = "nothing" })
+      stow()
     )
   }
 
   fun stow(): Command {
     return Commands.sequence(
-      InstantCommand ({ command = "stowing" }),
+        InstantCommand ({
+          SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.STOW.driveDynamics)
+          command = "stowing"
+        }),
       driveCommand.stopTracking(),
       pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
       WaitUntilCommand { pivot.atSetpoint() },
@@ -83,26 +80,19 @@ class SuperstructureManager(
     )
   }
 
-  fun stopTrack(): Command {
+  fun outtakeLow(): Command {
     return Commands.sequence(
-      driveCommand.stopTracking(),
-      InstantCommand ({ command = "nothing" })
-    )
-  }
-
-  fun outtake(): Command {
-    return Commands.sequence(
-      stopTrack(),
       InstantCommand({ command = "outtaking "}),
-      intake.outtake(),
+      intake.outtake(true),
       InstantCommand ({ command = "nothing" })
     )
   }
 
-  fun autoAim(): Command {
+  fun outtakeHigh(): Command {
     return Commands.sequence(
-      InstantCommand({ command = "tracking "}),
-      driveCommand.trackAngle()
+      InstantCommand({ command = "outtaking "}),
+      intake.outtake(false),
+      InstantCommand ({ command = "nothing" })
     )
   }
 
@@ -111,7 +101,6 @@ class SuperstructureManager(
       return SuperstructureManager(
         robot.drive,
         robot.driveCommand,
-        robot.poseSubsystem,
         robot.intake,
         robot.pivot
       )

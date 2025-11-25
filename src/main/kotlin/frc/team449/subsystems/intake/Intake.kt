@@ -50,7 +50,6 @@ class Intake(
       lasercanConfigured.plus(false)
       allSensorsConfigured = false
     }
-    shooterMotor.setVoltage(IntakeConstants.SHOOTER_VOLTAGE)
   }
 
   private fun detectsPiece(sensor: LaserCanInterface): Boolean {
@@ -78,12 +77,16 @@ class Intake(
     )
   }
 
-  fun outtake(): Command {
+  fun outtake(lowGoal: Boolean): Command {
     return Commands.sequence(
       runOnce {
         conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
-        firstIndexer.setVoltage(IntakeConstants.FIRST_INDEXER_VOLTAGE)
-        shooterMotor.setVoltage(IntakeConstants.SHOOTER_VOLTAGE)
+        secondIndexer.setVoltage(IntakeConstants.SECOND_INDEXER_VOLTAGE)
+        if (lowGoal) {
+          shooterMotor.setVoltage(IntakeConstants.SHOOTER_LOW_VOLTAGE)
+        } else {
+          shooterMotor.setVoltage(IntakeConstants.SHOOTER_HIGH_VOLTAGE)
+        }
       },
       WaitCommand(1.0),
       WaitUntilCommand { piecesShot() },
@@ -102,6 +105,7 @@ class Intake(
       intakeLeader.stopMotor()
       firstIndexer.stopMotor()
       secondIndexer.stopMotor()
+      shooterMotor.stopMotor()
     }
   }
 
