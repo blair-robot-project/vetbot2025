@@ -72,7 +72,6 @@ class SuperstructureManager(
           SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.STOW.driveDynamics)
           command = "stowing"
         }),
-      driveCommand.stopTracking(),
       pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
       WaitUntilCommand { pivot.atSetpoint() },
       pivot.hold(),

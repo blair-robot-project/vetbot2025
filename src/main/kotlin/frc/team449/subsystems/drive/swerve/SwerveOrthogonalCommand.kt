@@ -45,9 +45,7 @@ class SwerveOrthogonalCommand(
   private val allianceCompensation = { if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) PI else 0.0 }
   private val directionCompensation = { if (DriverStation.getAlliance().getOrNull() == DriverStation.Alliance.Red) -1.0 else 1.0 }
 
-  var stayAtAngle = false
   var headingLock = false
-  var trackingAngleSupplier: Supplier<Angle> = Supplier { Radians.of(0.0) }
 
   private var rotRamp = SlewRateLimiter(RobotConstants.ROT_RATE_LIMIT)
 
@@ -68,10 +66,6 @@ class SwerveOrthogonalCommand(
     addRequirements(drive)
     rotCtrl.enableContinuousInput(-PI, PI)
     rotCtrl.setTolerance(RobotConstants.SNAP_TO_ANGLE_TOLERANCE_RAD)
-  }
-
-  fun setTrackSupplier(supplier: Supplier<Angle>) {
-    trackingAngleSupplier = supplier
   }
 
   override fun initialize() {
@@ -115,20 +109,6 @@ class SwerveOrthogonalCommand(
     RunCommand({ snapToAngle(angle) })
       .until(::checkSnapToAngleTolerance)
       .andThen(::exitSnapToAngle)
-
-  fun trackAngle(): Command {
-    return InstantCommand({
-      headingLock = true
-      stayAtAngle = true
-    })
-  }
-
-  fun stopTracking(): Command {
-    return InstantCommand ({
-      headingLock = false
-      stayAtAngle = false }
-    )
-  }
 
   override fun execute() {
     val currTime = timer.get()
@@ -191,12 +171,7 @@ class SwerveOrthogonalCommand(
           ) * -sign(controller.rightX) * drive.maxRotSpeed,
         )
       } else {
-        if (!stayAtAngle) {
-          if (checkSnapToAngleTolerance()) headingLock = false
-        } else {
-          val desAngle = MathUtil.angleModulus(trackingAngleSupplier.get().`in`(Radians) + allianceCompensation.invoke())
-          rotCtrl.calculate(poseEstimator.heading.radians, desAngle)
-        }
+        if (checkSnapToAngleTolerance()) headingLock = false
 
         MathUtil.clamp(
           rotCtrl.calculate(poseEstimator.heading.radians),
