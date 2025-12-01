@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.spark.SparkMax
 import edu.wpi.first.math.filter.Debouncer
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.ConditionalCommand
@@ -29,6 +30,7 @@ class Intake(
   private val leftSensor: LaserCanInterface,
   private val shooterSensor: LaserCanInterface
   ): SubsystemBase() {
+  private val timer = Timer()
   private val shootingDebouncer = Debouncer(IntakeConstants.SHOOTING_DEBOUNCE_TIME, Debouncer.DebounceType.kFalling)
 
   private val sensors =
@@ -43,7 +45,11 @@ class Intake(
   private var shootingSensorDown = false
   private var lasercanConfigured = listOf<Boolean>()
 
-  init {
+  private fun configureSensors() {
+    allSensorsConfigured = true
+    intakingSensorDown = false
+    shootingSensorDown = false
+    lasercanConfigured = listOf<Boolean>()
     try {
       for (sensor in sensors) {
         sensor.setTimingBudget(LaserCanInterface.TimingBudget.TIMING_BUDGET_33MS)
@@ -61,6 +67,11 @@ class Intake(
     if(!(lasercanConfigured[0] && lasercanConfigured[1])) { //DEMORGANSSSS
       intakingSensorDown = true
     }
+  }
+
+  init {
+    configureSensors()
+    timer.start()
   }
 
   private fun detectsPiece(sensor: LaserCanInterface): Boolean {
@@ -143,6 +154,14 @@ class Intake(
       firstIndexer.stopMotor()
       secondIndexer.stopMotor()
       shooterMotor.stopMotor()
+    }
+  }
+
+  override fun periodic() {
+    if (!allSensorsConfigured && timer.hasElapsed(IntakeConstants.RECONFIGURE_WAIT_TIME)) {
+      //will shortcircuit if all configured so don't worry about expensive calc with has elapsed
+      //retry configuring sensors
+      configureSensors()
     }
   }
 

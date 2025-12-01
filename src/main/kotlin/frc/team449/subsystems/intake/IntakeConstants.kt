@@ -40,4 +40,5 @@ object IntakeConstants {
   const val SHOOTER_SPINUP_TIME = 0.5 //seconds
   const val SHOOTING_DEBOUNCE_TIME = 1.0 //seconds
   const val NO_SENSOR_WAIT_TIME = 2.0 //seconds
+  const val RECONFIGURE_WAIT_TIME = 10.0 //seconds
 }
