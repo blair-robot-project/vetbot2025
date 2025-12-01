@@ -87,8 +87,8 @@ class Intake(
           WaitUntilCommand { pieceIntaken() },
           WaitCommand(0.5),
         ),
-        WaitCommand(2.0),
-        { intakingSensorDown }
+        WaitCommand(IntakeConstants.NO_SENSOR_WAIT_TIME),
+        { !intakingSensorDown }
       ),
       stop()
     )
@@ -108,7 +108,14 @@ class Intake(
         conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
         secondIndexer.setVoltage(IntakeConstants.SECOND_INDEXER_VOLTAGE)
       },
-      WaitUntilCommand { shootingDebouncer.calculate(piecesShot())},
+      ConditionalCommand(
+        Commands.sequence(
+          WaitUntilCommand { piecesShot() },
+          WaitUntilCommand { shootingDebouncer.calculate(!piecesShot())} // falling edge
+        ),
+        WaitCommand(IntakeConstants.NO_SENSOR_WAIT_TIME),
+        { !shootingSensorDown }
+      ),
       stop()
     )
   }
