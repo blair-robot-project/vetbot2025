@@ -6,15 +6,14 @@ import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveDrive
 
 object SuperstructureGoal {
-
   val STOW = SuperstructureState(
-    Radians.of(1.0), // TODO: find
+    Degrees.of(89.273), // TODO: find
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED),
     "Stow"
   )
 
   val INTAKE = SuperstructureState( // TODO: find
-    Radians.of(0.0),
+    Degrees.of(0.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED),
     "Intake"
   )

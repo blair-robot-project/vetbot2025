@@ -85,7 +85,7 @@ class RobotLoop : TimedRobot() {
   override fun autonomousPeriodic() {}
 
   override fun teleopInit() {
-    robot.superstructureManager.requestGoal(SuperstructureGoal.STOW).schedule()
+    robot.superstructureManager.stow().schedule()
 
     (robot.light.currentCommand ?: InstantCommand()).cancel()
 

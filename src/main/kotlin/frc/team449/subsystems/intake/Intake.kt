@@ -2,7 +2,6 @@ package frc.team449.subsystems.intake
 
 import au.grapplerobotics.LaserCan
 import au.grapplerobotics.interfaces.LaserCanInterface
-import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.spark.SparkMax
@@ -11,11 +10,9 @@ import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
-import com.ctre.phoenix6.signals.InvertedValue
 import frc.team449.system.motor.createFollowerSpark
 import frc.team449.system.motor.createKraken
 import frc.team449.system.motor.createSparkMax
-import java.util.function.Supplier
 
 class Intake(
   private val intakeLeader: TalonFX,
@@ -77,7 +74,7 @@ class Intake(
     )
   }
 
-  fun outtake(lowGoal: Boolean): Command {
+  fun shoot(lowGoal: Boolean): Command {
     return Commands.sequence(
       runOnce {
         conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
@@ -95,11 +92,21 @@ class Intake(
     )
   }
 
+  fun reject(): Command {
+    return Commands.sequence(
+      runOnce {
+        intakeLeader.setVoltage(-IntakeConstants.INTAKE_VOLTAGE)
+        firstIndexer.setVoltage(-IntakeConstants.FIRST_INDEXER_VOLTAGE)
+        conveyorMotor.setVoltage(-IntakeConstants.CONVEYOR_INTAKE_VOLTAGE)
+      },
+    )
+  }
+
   fun piecesShot(): Boolean {
     return detectsPiece(shooterSensor)
   }
 
-  private fun stop(): Command {
+  fun stop(): Command {
     return runOnce {
       conveyorMotor.stopMotor()
       intakeLeader.stopMotor()
