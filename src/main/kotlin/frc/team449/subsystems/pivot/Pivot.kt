@@ -39,7 +39,7 @@ class Pivot (
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        PositionVoltage(request.Position)
+        PositionVoltage(positionSupplier.get())
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
           .withFeedForward(PivotConstants.INTAKE_WEIGHT_KG * cos(positionSupplier.get()))
       )

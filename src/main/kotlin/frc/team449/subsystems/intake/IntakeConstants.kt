@@ -27,6 +27,7 @@ object IntakeConstants {
   const val SHOOTER_SENSOR_ID = 10 // TODO: find
 
   const val INTAKE_VOLTAGE = 4.0
+  const val SHOOTING_DEBOUNCE_TIME = 1.0
   const val CONVEYOR_INTAKE_VOLTAGE = 4.0
   const val FIRST_INDEXER_VOLTAGE = 5.0
   const val SECOND_INDEXER_VOLTAGE = 5.0
@@ -35,4 +36,5 @@ object IntakeConstants {
 
   const val SHOOTER_HIGH_VOLTAGE = 8.0
   const val SHOOTER_LOW_VOLTAGE = 3.0
+  const val SHOOTER_SPINUP_TIME = 0.5 //seconds
 }

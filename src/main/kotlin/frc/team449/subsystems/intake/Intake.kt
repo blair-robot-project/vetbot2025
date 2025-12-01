@@ -5,8 +5,10 @@ import au.grapplerobotics.interfaces.LaserCanInterface
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.spark.SparkMax
+import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
@@ -16,14 +18,18 @@ import frc.team449.system.motor.createSparkMax
 
 class Intake(
   private val intakeLeader: TalonFX,
+  follower1: TalonFX,
   private val firstIndexer: SparkMax,
+  follower2: SparkMax,
   private val secondIndexer: SparkMax,
+  follower3: SparkMax,
   private val conveyorMotor: SparkMax,
   private val shooterMotor: TalonFX,
   private val rightSensor: LaserCanInterface,
   private val leftSensor: LaserCanInterface,
   private val shooterSensor: LaserCanInterface
   ): SubsystemBase() {
+  private val shootingDebouncer = Debouncer(IntakeConstants.SHOOTING_DEBOUNCE_TIME, Debouncer.DebounceType.kFalling)
 
   private val sensors =
     listOf(
@@ -33,6 +39,8 @@ class Intake(
     )
 
   private var allSensorsConfigured = true
+  private var intakingSensorDown = false
+  private var shootingSensorDown = false
   private var lasercanConfigured = listOf<Boolean>()
 
   init {
@@ -46,6 +54,12 @@ class Intake(
     } catch (_: Exception) {
       lasercanConfigured.plus(false)
       allSensorsConfigured = false
+    }
+    if(!lasercanConfigured[2]) {
+      shootingSensorDown = true
+    }
+    if(!(lasercanConfigured[0] && lasercanConfigured[1])) { //DEMORGANSSSS
+      intakingSensorDown = true
     }
   }
 
@@ -68,8 +82,14 @@ class Intake(
         firstIndexer.setVoltage(IntakeConstants.FIRST_INDEXER_VOLTAGE)
         conveyorMotor.setVoltage(IntakeConstants.CONVEYOR_INTAKE_VOLTAGE)
       },
-      WaitUntilCommand { pieceIntaken() },
-      WaitCommand(0.5),
+      ConditionalCommand (
+        Commands.sequence(
+          WaitUntilCommand { pieceIntaken() },
+          WaitCommand(0.5),
+        ),
+        WaitCommand(2.0),
+        { intakingSensorDown }
+      ),
       stop()
     )
   }
@@ -77,17 +97,18 @@ class Intake(
   fun shoot(lowGoal: Boolean): Command {
     return Commands.sequence(
       runOnce {
-        conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
-        secondIndexer.setVoltage(IntakeConstants.SECOND_INDEXER_VOLTAGE)
         if (lowGoal) {
           shooterMotor.setVoltage(IntakeConstants.SHOOTER_LOW_VOLTAGE)
         } else {
           shooterMotor.setVoltage(IntakeConstants.SHOOTER_HIGH_VOLTAGE)
         }
       },
-      WaitCommand(1.0),
-      WaitUntilCommand { piecesShot() },
-      WaitCommand(0.1),
+      WaitCommand(IntakeConstants.SHOOTER_SPINUP_TIME),
+      runOnce {
+        conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
+        secondIndexer.setVoltage(IntakeConstants.SECOND_INDEXER_VOLTAGE)
+      },
+      WaitUntilCommand { shootingDebouncer.calculate(piecesShot())},
       stop()
     )
   }
@@ -99,6 +120,8 @@ class Intake(
         firstIndexer.setVoltage(-IntakeConstants.FIRST_INDEXER_VOLTAGE)
         conveyorMotor.setVoltage(-IntakeConstants.CONVEYOR_INTAKE_VOLTAGE)
       },
+      WaitCommand(2.0),
+      stop()
     )
   }
 
@@ -173,8 +196,11 @@ class Intake(
 
       return Intake(
         intakeLeader,
+        intakeFollower,
         firstIndexerLeaderMotor,
+        firstIndexerFollowerMotor,
         secondIndexerLeaderMotor,
+        secondIndexerFollowerMotor,
         conveyorMotor,
         shooterMotor,
         rightSensor,

@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveSim
 import frc.team449.subsystems.drive.swerve.WheelRadiusCharacterization
-import frc.team449.subsystems.superstructure.SuperstructureGoal
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.PI
 import kotlin.random.Random
@@ -29,8 +28,9 @@ class ControllerBindings(
   private fun robotBindings() {
     stow()
     intake()
-    highOuttake()
-    lowOuttake()
+    shootHigh()
+    shootLow()
+    rejectPiece()
   }
 
   private fun characterizationBindings() {
@@ -69,15 +69,21 @@ class ControllerBindings(
     )
   }
 
-  private fun lowOuttake() {
+  private fun shootLow() {
     driveController.a().onTrue(
-      robot.superstructureManager.outtakeLow()
+      robot.superstructureManager.shootLow()
     )
   }
 
-  private fun highOuttake() {
+  private fun shootHigh() {
     driveController.y().onTrue(
-      robot.superstructureManager.outtakeHigh()
+      robot.superstructureManager.shootHigh()
+    )
+  }
+
+  private fun rejectPiece() {
+    driveController.povUp().onTrue(
+      robot.superstructureManager.rejectPiece()
     )
   }
 

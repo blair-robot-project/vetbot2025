@@ -77,20 +77,24 @@ class SuperstructureManager(
     )
   }
 
-  fun outtakeLow(): Command {
+  fun shootLow(): Command {
     return Commands.sequence(
-      InstantCommand({ command = "outtaking "}),
+      InstantCommand({ command = "shooting low "}),
       intake.shoot(true),
       InstantCommand ({ command = "nothing" })
     )
   }
 
-  fun outtakeHigh(): Command {
+  fun shootHigh(): Command {
     return Commands.sequence(
-      InstantCommand({ command = "outtaking "}),
+      InstantCommand({ command = "shooting high "}),
       intake.shoot(false),
       InstantCommand ({ command = "nothing" })
     )
+  }
+
+  fun rejectPiece(): Command {
+    return intake.reject()
   }
 
   companion object {
