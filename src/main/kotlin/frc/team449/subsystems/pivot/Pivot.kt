@@ -31,7 +31,6 @@ class Pivot (
         request
           .withPosition(position)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(PivotConstants.INTAKE_WEIGHT_KG * cos(positionSupplier.get()))
       )
     }
   }
@@ -41,7 +40,6 @@ class Pivot (
       motor.setControl(
         PositionVoltage(positionSupplier.get())
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-          .withFeedForward(PivotConstants.INTAKE_WEIGHT_KG * cos(positionSupplier.get()))
       )
     }
   }
