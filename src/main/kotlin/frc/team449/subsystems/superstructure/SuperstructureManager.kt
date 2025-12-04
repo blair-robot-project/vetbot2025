@@ -48,7 +48,7 @@ class SuperstructureManager(
     return command
   }
 
-  fun intake(): Command {
+  fun prepIntake(): Command {
     return Commands.sequence(
       InstantCommand ({
         SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.INTAKE.driveDynamics)
@@ -57,9 +57,16 @@ class SuperstructureManager(
       pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
       WaitUntilCommand { pivot.atSetpoint() },
       pivot.hold(),
+      InstantCommand ({ command = "nothing" })
+    )
+  }
+
+  fun intake(): Command {
+    return Commands.sequence(
       InstantCommand ({ command = "intaking" }),
       intake.intake(),
-      stow()
+      InstantCommand ({ command = "nothing" }),
+      stow().onlyIf { intake.pieces == 3 }
     )
   }
 

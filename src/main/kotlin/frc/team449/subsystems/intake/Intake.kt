@@ -44,6 +44,7 @@ class Intake(
   private var intakingSensorDown = false
   private var shootingSensorDown = false
   private var lasercanConfigured = listOf<Boolean>()
+  var pieces = 0
 
   private fun configureSensors() {
     allSensorsConfigured = true
@@ -98,10 +99,10 @@ class Intake(
           WaitUntilCommand { pieceIntaken() },
           WaitCommand(0.5),
         ),
-        WaitCommand(IntakeConstants.NO_SENSOR_WAIT_TIME),
-        { !intakingSensorDown }
-      ),
-      stop()
+        WaitCommand(IntakeConstants.NO_SENSOR_WAIT_TIME)
+      ) { !intakingSensorDown },
+      stop(),
+      runOnce { pieces++ }
     )
   }
 
@@ -127,7 +128,8 @@ class Intake(
         WaitCommand(IntakeConstants.NO_SENSOR_WAIT_TIME),
         { !shootingSensorDown }
       ),
-      stop()
+      stop(),
+      runOnce { pieces = 0 }
     )
   }
 

@@ -6,7 +6,9 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism
@@ -28,6 +30,7 @@ class ControllerBindings(
   private fun robotBindings() {
     stow()
     intake()
+    prepIntake()
     shootHigh()
     shootLow()
     rejectPiece()
@@ -49,7 +52,7 @@ class ControllerBindings(
 /** driver controller dpad **/
   // povUp
   private fun resetGyro() {
-    driveController.povUp().onTrue(
+    driveController.a().onTrue(
       ConditionalCommand(
         InstantCommand({ robot.poseSubsystem.heading = Rotation2d(PI) }),
         InstantCommand({ robot.poseSubsystem.heading = Rotation2d() }),
@@ -58,32 +61,41 @@ class ControllerBindings(
   }
 
   private fun stow() {
-    driveController.b().onTrue(
+    driveController.rightBumper().onTrue(
       robot.superstructureManager.stow()
     )
   }
 
   private fun intake() {
-    driveController.x().onTrue(
+    driveController.leftBumper().onTrue(
       robot.superstructureManager.intake()
     )
   }
 
+  private fun prepIntake() {
+    driveController.leftTrigger().onTrue(
+      robot.superstructureManager.prepIntake()
+    )
+  }
+
   private fun shootLow() {
-    driveController.a().onTrue(
+    driveController.y().onTrue(
       robot.superstructureManager.shootLow()
+        .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) }) )
     )
   }
 
   private fun shootHigh() {
-    driveController.y().onTrue(
+    driveController.rightTrigger().onTrue(
       robot.superstructureManager.shootHigh()
+        .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) }) )
     )
   }
 
   private fun rejectPiece() {
-    driveController.povUp().onTrue(
+    driveController.x().onTrue(
       robot.superstructureManager.rejectPiece()
+
     )
   }
 
