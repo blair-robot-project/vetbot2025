@@ -12,6 +12,7 @@ import frc.team449.system.motor.createKraken
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.FunctionalCommand
 import frc.team449.subsystems.superstructure.SuperstructureGoal
 import java.util.function.Supplier
@@ -25,33 +26,33 @@ class Pivot (
 
   private val timer = Timer()
   val positionSupplier = Supplier { motor.position.valueAsDouble }
+  init {
+    motor.setPosition(PivotConstants.TRUE_STOW_ANGLE)
+  }
 
   private val request: MotionMagicVoltage = MotionMagicVoltage(
     SuperstructureGoal.STOW.pivot.`in`(Radians)
   ).withEnableFOC(false)
 
-  fun resetPos(): Command {
-    return runOnce {
-      motor.setPosition(PivotConstants.TRUE_STOW_ANGLE)
-    }
-  }
-
   fun setPosition(position: Double): Command {
-    return runOnce {
-      if(position < positionSupplier.get()) {
+    return Commands.sequence(
+      runOnce {
         val config = TalonFXConfiguration()
-        config.MotorOutput.NeutralMode = NeutralModeValue.Coast
+        if(position < positionSupplier.get()) {
+          config.MotorOutput.NeutralMode = NeutralModeValue.Coast
+        } else {
+          config.MotorOutput.NeutralMode = NeutralModeValue.Brake
+        }
         motor.configurator.apply(config)
-      }
-    }.andThen(
+      },
       runOnce {
         motor.setControl(
           request
-            .withPosition(position)
-            .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
+              .withPosition(position)
+              .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
         )
       }
-    )
+    ).withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
   }
 
   fun hold(): Command {

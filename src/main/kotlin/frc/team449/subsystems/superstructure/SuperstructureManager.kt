@@ -63,10 +63,10 @@ class SuperstructureManager(
 
   fun intake(): Command {
     return Commands.sequence(
+      prepIntake(),
       InstantCommand ({ command = "intaking" }),
       intake.intake(),
-      InstantCommand ({ command = "nothing" }),
-      stow().onlyIf { intake.pieces == 3 }
+      InstantCommand ({ command = "nothing" })
     )
   }
 

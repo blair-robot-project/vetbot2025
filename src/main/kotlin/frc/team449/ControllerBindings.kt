@@ -28,10 +28,10 @@ class ControllerBindings(
   private fun robotBindings() {
     stow()
     intake()
-    prepIntake()
     shootHigh()
     shootLow()
     rejectPiece()
+    currentHome()
   }
 
   private fun characterizationBindings() {
@@ -65,8 +65,12 @@ class ControllerBindings(
   }
 
   private fun intake() {
-    driveController.leftBumper().onTrue(
+    driveController.leftBumper().whileTrue(
       robot.superstructureManager.intake()
+    ).onFalse(
+      robot.intake.stop().andThen(
+        robot.superstructureManager.stow()
+      )
     )
   }
 
