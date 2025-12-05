@@ -1,9 +1,11 @@
 package frc.team449.subsystems.pivot
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.GravityTypeValue
+import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.team449.system.motor.createKraken
@@ -29,13 +31,21 @@ class Pivot (
   ).withEnableFOC(false)
 
   fun setPosition(position: Double): Command {
-    return this.runOnce {
-      motor.setControl(
-        request
-          .withPosition(position)
-          .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-      )
-    }
+    return runOnce {
+      if(position < positionSupplier.get()) {
+        val config = TalonFXConfiguration()
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast
+        motor.configurator.apply(config)
+      }
+    }.andThen(
+      runOnce {
+        motor.setControl(
+          request
+            .withPosition(position)
+            .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
+        )
+      }
+    )
   }
 
   fun hold(): Command {

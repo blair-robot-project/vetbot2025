@@ -22,9 +22,9 @@ object IntakeConstants {
   const val SHOOTER_ID = 16
   const val SHOOTER_INVERTED = false
 
-  const val LEFT_SENSOR_ID = 8 // TODO: find
-  const val RIGHT_SENSOR_ID = 9 // TODO: find
-  const val SHOOTER_SENSOR_ID = 10 // TODO: find
+  const val LEFT_SENSOR_ID = 20
+  const val RIGHT_SENSOR_ID = 21
+  const val SHOOTER_SENSOR_ID = 22
 
   const val INTAKE_VOLTAGE = 4.0
 
