@@ -65,18 +65,12 @@ class ControllerBindings(
   }
 
   private fun intake() {
-    driveController.leftBumper().whileTrue(
+    driveController.leftTrigger().whileTrue(
       robot.superstructureManager.intake()
     ).onFalse(
       robot.intake.stop().andThen(
         robot.superstructureManager.stow()
       )
-    )
-  }
-
-  private fun prepIntake() {
-    driveController.leftTrigger().onTrue(
-      robot.superstructureManager.prepIntake()
     )
   }
 
@@ -95,7 +89,7 @@ class ControllerBindings(
   }
 
   private fun rejectPiece() {
-    driveController.x().onTrue(
+    driveController.leftBumper().onTrue(
       robot.superstructureManager.rejectPiece()
 
     )

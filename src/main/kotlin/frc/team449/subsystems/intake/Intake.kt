@@ -156,7 +156,7 @@ class Intake(
       firstIndexer.stopMotor()
       secondIndexer.stopMotor()
       shooterMotor.stopMotor()
-    }
+    }.withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
   }
 
   override fun periodic() {
