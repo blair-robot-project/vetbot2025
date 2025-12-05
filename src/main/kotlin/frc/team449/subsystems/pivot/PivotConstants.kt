@@ -22,11 +22,11 @@ object PivotConstants {
   val INTAKE_WEIGHT_KG = 5.0 // TODO: find
 
   /** Current Homing constants */
-  val HOMING_VOLTAGE = Volts.of(2.0)
+  val HOMING_VOLTAGE = Volts.of(-2.0)
   val HOMING_TIME_CUTOFF = Seconds.of(4.0)
   val HOMING_CURRENT_CUTOFF = Amps.of(20.0)
   val HOMING_MAX_VEL = RotationsPerSecond.of(0.05)
-  val TRUE_STOW_ANGLE = Degrees.of(91.233851)
+  val TRUE_STOW_ANGLE = Degrees.of(92.1)
 
   val PIVOT_CRUISE_VEL = RotationsPerSecond.of(0.5) // max theoretical 0.3968  // 0.365 norm
   val PIVOT_MAX_ACCEL = RotationsPerSecondPerSecond.of(1.8) // 5.0, heavily limited by robot tipping // 2.125

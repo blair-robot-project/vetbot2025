@@ -85,6 +85,7 @@ class RobotLoop : TimedRobot() {
   override fun autonomousPeriodic() {}
 
   override fun teleopInit() {
+    robot.pivot.resetPos().schedule()
     robot.superstructureManager.stow().schedule()
 
     (robot.light.currentCommand ?: InstantCommand()).cancel()

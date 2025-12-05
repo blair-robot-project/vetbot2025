@@ -30,6 +30,12 @@ class Pivot (
     SuperstructureGoal.STOW.pivot.`in`(Radians)
   ).withEnableFOC(false)
 
+  fun resetPos(): Command {
+    return runOnce {
+      motor.setPosition(PivotConstants.TRUE_STOW_ANGLE)
+    }
+  }
+
   fun setPosition(position: Double): Command {
     return runOnce {
       if(position < positionSupplier.get()) {
