@@ -43,6 +43,7 @@ class SuperstructureManager(
 ) {
 
   private var command = "stow"
+
   @Logged(name = "current command")
   fun logCommand(): String {
     return command
@@ -50,22 +51,22 @@ class SuperstructureManager(
 
   fun prepIntake(): Command {
     return Commands.sequence(
-      InstantCommand ({
+      InstantCommand({
         SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.INTAKE.driveDynamics)
         command = "moving to intake"
       }),
       pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
       WaitUntilCommand { pivot.atSetpoint() },
       pivot.hold(),
-      InstantCommand ({ command = "nothing" })
+      InstantCommand({ command = "nothing" })
     )
   }
 
   fun intake(): Command {
     return Commands.sequence(
-      InstantCommand ({ command = "intaking" }),
+      InstantCommand({ command = "intaking" }),
       intake.intake(),
-      InstantCommand ({ command = "nothing" }),
+      InstantCommand({ command = "nothing" }),
       stow().onlyIf { intake.pieces == 3 }
     )
   }
@@ -73,30 +74,30 @@ class SuperstructureManager(
   fun stow(): Command {
     return Commands.sequence(
       intake.stop(),
-        InstantCommand ({
-          SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.STOW.driveDynamics)
-          command = "stowing"
-        }),
+      InstantCommand({
+        SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.STOW.driveDynamics)
+        command = "stowing"
+      }),
       pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
       WaitUntilCommand { pivot.atSetpoint() },
       pivot.hold(),
-      InstantCommand ({ command = "nothing" })
+      InstantCommand({ command = "nothing" })
     )
   }
 
   fun shootLow(): Command {
     return Commands.sequence(
-      InstantCommand({ command = "shooting low "}),
+      InstantCommand({ command = "shooting low " }),
       intake.shoot(true),
-      InstantCommand ({ command = "nothing" })
+      InstantCommand({ command = "nothing" })
     )
   }
 
   fun shootHigh(): Command {
     return Commands.sequence(
-      InstantCommand({ command = "shooting high "}),
+      InstantCommand({ command = "shooting high " }),
       intake.shoot(false),
-      InstantCommand ({ command = "nothing" })
+      InstantCommand({ command = "nothing" })
     )
   }
 

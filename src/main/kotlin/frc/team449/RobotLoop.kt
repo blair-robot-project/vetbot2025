@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:import-ordering", "ktlint:standard:no-wildcard-imports")
+
 package frc.team449
 
 import au.grapplerobotics.CanBridge
@@ -13,8 +15,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
 import frc.team449.auto.Routines
 import frc.team449.subsystems.drive.swerve.SwerveSim
-import frc.team449.subsystems.superstructure.SuperstructureGoal
-import frc.team449.subsystems.vision.VisionConstants
+// import frc.team449.subsystems.vision.VisionConstants
 import org.littletonrobotics.urcl.URCL
 import kotlin.math.*
 
@@ -78,6 +79,7 @@ class RobotLoop : TimedRobot() {
     robot.field.getObject("bumpers").pose = robot.poseSubsystem.pose
   }
 
+  @Suppress("ktlint:standard:kdoc")
   override fun autonomousInit() {
     /** Every time auto starts, we update the chosen auto command. */
   }
@@ -113,12 +115,12 @@ class RobotLoop : TimedRobot() {
     // Superstructure Simulation
     robot.drive as SwerveSim
 
-    VisionConstants.ESTIMATORS.forEach {
-      it.simulationPeriodic(robot.drive.odometryPose)
-    }
+//    VisionConstants.ESTIMATORS.forEach {
+//      it.simulationPeriodic(robot.drive.odometryPose)
+//    }
 
-    VisionConstants.VISION_SIM.debugField
-      .getObject("EstimatedRobot")
-      .pose = robot.poseSubsystem.pose
+//    VisionConstants.VISION_SIM.debugField
+//      .getObject("EstimatedRobot")
+//      .pose = robot.poseSubsystem.pose
   }
 }

@@ -5,7 +5,6 @@ import edu.wpi.first.units.measure.Frequency
 
 object PivotConstants {
 
-
   const val PIVOT_ID = 3 // TODO: find
   const val PIVOT_INVERTED = false // TODO: find
 

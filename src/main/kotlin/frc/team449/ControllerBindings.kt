@@ -24,9 +24,8 @@ class ControllerBindings(
   private val mechanismController: CommandXboxController,
   private val characterizationController: CommandXboxController,
   private val testController: CommandXboxController,
-  private val robot: Robot
+  private val robot: Robot,
 ) {
-
   private fun robotBindings() {
     stow()
     intake()
@@ -62,43 +61,43 @@ class ControllerBindings(
 
   private fun stow() {
     driveController.rightBumper().onTrue(
-      robot.superstructureManager.stow()
+      robot.superstructureManager.stow(),
     )
   }
 
   private fun intake() {
     driveController.leftBumper().onTrue(
-      robot.superstructureManager.intake()
+      robot.superstructureManager.intake(),
     )
   }
 
   private fun prepIntake() {
     driveController.leftTrigger().onTrue(
-      robot.superstructureManager.prepIntake()
+      robot.superstructureManager.prepIntake(),
     )
   }
 
   private fun shootLow() {
     driveController.y().onTrue(
-      robot.superstructureManager.shootLow()
-        .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) }) )
+      robot.superstructureManager
+        .shootLow()
+        .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) })),
     )
   }
 
   private fun shootHigh() {
     driveController.rightTrigger().onTrue(
-      robot.superstructureManager.shootHigh()
-        .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) }) )
+      robot.superstructureManager
+        .shootHigh()
+        .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) })),
     )
   }
 
   private fun rejectPiece() {
     driveController.x().onTrue(
-      robot.superstructureManager.rejectPiece()
-
+      robot.superstructureManager.rejectPiece(),
     )
   }
-
 
   private fun slowDrive() {
     driveController
@@ -114,20 +113,20 @@ class ControllerBindings(
       )
   }
 
-  private fun resetOdometrySim() {
-    driveController.a().onTrue(
-      InstantCommand({
-        robot.drive as SwerveSim
-        robot.drive.resetOdometryOnly(
-          Pose2d(
-            robot.drive.odometryPose.x + Random.nextDouble(-1.0, 1.0),
-            robot.drive.odometryPose.y + Random.nextDouble(-1.0, 1.0),
-            robot.drive.odometryPose.rotation,
-          ),
-        )
-      }),
-    )
-  }
+//  private fun resetOdometrySim() {
+//    driveController.a().onTrue(
+//      InstantCommand({
+//        robot.drive as SwerveSim
+//        robot.drive.resetOdometryOnly(
+//          Pose2d(
+//            robot.drive.odometryPose.x + Random.nextDouble(-1.0, 1.0),
+//            robot.drive.odometryPose.y + Random.nextDouble(-1.0, 1.0),
+//            robot.drive.odometryPose.rotation,
+//          ),
+//        )
+//      }),
+//    )
+//  }
 
   private fun pointToRight() {
     driveController.a().onTrue(

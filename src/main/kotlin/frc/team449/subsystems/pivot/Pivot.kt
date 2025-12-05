@@ -5,18 +5,17 @@ import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.GravityTypeValue
 import edu.wpi.first.epilogue.Logged
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.team449.system.motor.createKraken
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.subsystems.superstructure.SuperstructureGoal
+import frc.team449.system.motor.createKraken
 import java.util.function.Supplier
 import kotlin.math.abs
-import kotlin.math.cos
 
 @Logged
-class Pivot (
-  val motor: TalonFX,
+class Pivot(
+  val motor: TalonFX
 ) : SubsystemBase() {
 
   val positionSupplier = Supplier { motor.position.valueAsDouble }
@@ -55,7 +54,7 @@ class Pivot (
   }
 
   companion object {
-    fun createPivot() : Pivot {
+    fun createPivot(): Pivot {
       val pivotMotor = createKraken(
         PivotConstants.PIVOT_ID,
         PivotConstants.PIVOT_INVERTED,

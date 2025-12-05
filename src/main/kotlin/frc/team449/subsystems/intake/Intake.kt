@@ -29,7 +29,7 @@ class Intake(
   private val rightSensor: LaserCanInterface,
   private val leftSensor: LaserCanInterface,
   private val shooterSensor: LaserCanInterface
-  ): SubsystemBase() {
+) : SubsystemBase() {
   private val timer = Timer()
   private val shootingDebouncer = Debouncer(IntakeConstants.SHOOTING_DEBOUNCE_TIME, Debouncer.DebounceType.kFalling)
 
@@ -62,10 +62,10 @@ class Intake(
       lasercanConfigured.plus(false)
       allSensorsConfigured = false
     }
-    if(!lasercanConfigured[2]) {
+    if (!lasercanConfigured[2]) {
       shootingSensorDown = true
     }
-    if(!(lasercanConfigured[0] && lasercanConfigured[1])) { //DEMORGANSSSS
+    if (!(lasercanConfigured[0] && lasercanConfigured[1])) { // DEMORGANSSSS
       intakingSensorDown = true
     }
   }
@@ -94,7 +94,7 @@ class Intake(
         firstIndexer.setVoltage(IntakeConstants.FIRST_INDEXER_VOLTAGE)
         conveyorMotor.setVoltage(IntakeConstants.CONVEYOR_INTAKE_VOLTAGE)
       },
-      ConditionalCommand (
+      ConditionalCommand(
         Commands.sequence(
           WaitUntilCommand { pieceIntaken() },
           WaitCommand(0.5),
@@ -123,7 +123,7 @@ class Intake(
       ConditionalCommand(
         Commands.sequence(
           WaitUntilCommand { piecesShot() },
-          WaitUntilCommand { shootingDebouncer.calculate(!piecesShot())} // falling edge
+          WaitUntilCommand { shootingDebouncer.calculate(!piecesShot()) } // falling edge
         ),
         WaitCommand(IntakeConstants.NO_SENSOR_WAIT_TIME),
         { !shootingSensorDown }
@@ -161,15 +161,14 @@ class Intake(
 
   override fun periodic() {
     if (!allSensorsConfigured && timer.hasElapsed(IntakeConstants.RECONFIGURE_WAIT_TIME)) {
-      //will shortcircuit if all configured so don't worry about expensive calc with has elapsed
-      //retry configuring sensors
+      // will shortcircuit if all configured so don't worry about expensive calc with has elapsed
+      // retry configuring sensors
       configureSensors()
     }
   }
 
   companion object {
     fun createIntake(): Intake {
-
       val intakeLeader = createKraken(
         IntakeConstants.INTAKE_LEADER_ID,
         IntakeConstants.INTAKE_LEADER_INVERTED

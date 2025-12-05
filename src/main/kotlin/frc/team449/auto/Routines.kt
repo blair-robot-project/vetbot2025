@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.team449.Robot
 
 open class Routines(
-  val robot: Robot,
+  val robot: Robot
 ) {
   private val autoFactory =
     AutoFactory(
