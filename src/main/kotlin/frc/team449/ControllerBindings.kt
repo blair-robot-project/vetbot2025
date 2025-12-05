@@ -65,7 +65,7 @@ class ControllerBindings(
   }
 
   private fun intake() {
-    driveController.leftTrigger().whileTrue(
+    driveController.leftTrigger().onTrue(
       robot.superstructureManager.intake()
     ).onFalse(
       robot.intake.stop().andThen(
@@ -116,11 +116,11 @@ class ControllerBindings(
       )
   }
 
-  private fun resetOdometrySim() {
+ /* private fun resetOdometrySim() {
     driveController.a().onTrue(
       InstantCommand({
         robot.drive as SwerveSim
-        robot.drive.resetOdometryOnly(
+        (robot.drive as SwerveSim).resetOdometryOnly(
           Pose2d(
             robot.drive.odometryPose.x + Random.nextDouble(-1.0, 1.0),
             robot.drive.odometryPose.y + Random.nextDouble(-1.0, 1.0),
@@ -129,7 +129,7 @@ class ControllerBindings(
         )
       }),
     )
-  }
+  }*/
 
   private fun pointToRight() {
     driveController.a().onTrue(

@@ -113,9 +113,9 @@ class RobotLoop : TimedRobot() {
     // Superstructure Simulation
     robot.drive as SwerveSim
 
-    VisionConstants.ESTIMATORS.forEach {
-      it.simulationPeriodic(robot.drive.odometryPose)
-    }
+//    VisionConstants.ESTIMATORS.forEach {
+//      it.simulationPeriodic(robot.drive.odometryPose)
+//    }
 
     VisionConstants.VISION_SIM.debugField
       .getObject("EstimatedRobot")

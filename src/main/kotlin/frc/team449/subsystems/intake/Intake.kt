@@ -62,10 +62,10 @@ class Intake(
       lasercanConfigured.plus(false)
       allSensorsConfigured = false
     }
-    if(!lasercanConfigured[2]) {
+    if((lasercanConfigured.size < 3) || !lasercanConfigured[2]) {
       shootingSensorDown = true
     }
-    if(!(lasercanConfigured[0] && lasercanConfigured[1])) { //DEMORGANSSSS
+    if((lasercanConfigured.size < 2) || !(lasercanConfigured[0] && lasercanConfigured[1])) { //DEMORGANSSSS
       intakingSensorDown = true
     }
   }

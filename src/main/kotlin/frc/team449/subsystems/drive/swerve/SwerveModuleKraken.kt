@@ -93,6 +93,7 @@ open class SwerveModuleKraken(
   /** Set module speed to zero but keep module angle the same. */
   override fun stop() {
     turnController.setpoint = turnEncoder.position
+    drivingMotor.stopMotor()
     desiredState.speedMetersPerSecond = 0.0
   }
 
