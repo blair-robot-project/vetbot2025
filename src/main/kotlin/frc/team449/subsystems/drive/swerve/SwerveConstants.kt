@@ -11,10 +11,10 @@ object SwerveConstants {
   const val DUTY_CYCLE_DEADBAND = 0.001
 
   /** Drive motor ports */
-  const val DRIVE_MOTOR_FL = 21
-  const val DRIVE_MOTOR_FR = 22
-  const val DRIVE_MOTOR_BL = 23
-  const val DRIVE_MOTOR_BR = 24
+  const val DRIVE_MOTOR_FL = 1
+  const val DRIVE_MOTOR_FR = 2
+  const val DRIVE_MOTOR_BL = 3
+  const val DRIVE_MOTOR_BR = 4
 
   const val TURN_MOTOR_FL = 5
   const val TURN_MOTOR_FR = 6

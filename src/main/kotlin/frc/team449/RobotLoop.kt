@@ -80,7 +80,6 @@ class RobotLoop : TimedRobot() {
 
   override fun autonomousInit() {
     /** Every time auto starts, we update the chosen auto command. */
-    robot.pivot.currentHoming()
   }
 
   override fun autonomousPeriodic() {}

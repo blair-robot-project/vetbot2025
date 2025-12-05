@@ -97,6 +97,12 @@ class ControllerBindings(
     )
   }
 
+  private fun currentHome(){
+    driveController.povLeft().onTrue(
+      robot.pivot.currentHoming()
+    )
+  }
+
 
   private fun slowDrive() {
     driveController
