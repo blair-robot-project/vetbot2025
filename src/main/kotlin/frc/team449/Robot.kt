@@ -29,13 +29,7 @@ class Robot {
   val driveController: CommandXboxController = CommandXboxController(0)
 
   @get:NotLogged
-  val mechController: CommandXboxController = CommandXboxController(1)
-
-  @get:NotLogged
-  val characController: CommandXboxController = CommandXboxController(2)
-
-  @get:NotLogged
-  val testController: CommandXboxController = CommandXboxController(3)
+  val characController: CommandXboxController = CommandXboxController(1)
 
   val field = Field2d()
 

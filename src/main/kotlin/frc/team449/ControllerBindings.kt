@@ -21,9 +21,7 @@ import kotlin.random.Random
 
 class ControllerBindings(
   private val driveController: CommandXboxController,
-  private val mechanismController: CommandXboxController,
   private val characterizationController: CommandXboxController,
-  private val testController: CommandXboxController,
   private val robot: Robot
 ) {
 
@@ -40,7 +38,7 @@ class ControllerBindings(
   }
 
   private fun nonRobotBindings() {
-    slowDrive()
+//    slowDrive()
     /** NOTE: If you want to see simulated vision convergence times with this function, go to simulationPeriodic in
      * RobotBase and change the passed in pose to it.simulationPeriodic to robot.drive.odometryPose
      */
@@ -61,7 +59,7 @@ class ControllerBindings(
   }
 
   private fun stow() {
-    driveController.rightBumper().onTrue(
+    driveController.y().onTrue(
       robot.superstructureManager.stow()
     )
   }
@@ -79,7 +77,7 @@ class ControllerBindings(
   }
 
   private fun shootLow() {
-    driveController.y().onTrue(
+    driveController.rightBumper().onTrue(
       robot.superstructureManager.shootLow()
         .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) }) )
     )

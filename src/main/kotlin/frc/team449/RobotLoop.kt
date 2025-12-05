@@ -26,7 +26,7 @@ class RobotLoop : TimedRobot() {
 
   val routines = Routines(robot)
 
-  private val controllerBinder = ControllerBindings(robot.driveController, robot.mechController, robot.characController, robot.testController, robot)
+  private val controllerBinder = ControllerBindings(robot.driveController, robot.characController, robot)
 
   init {
     CanBridge.runTCP()
@@ -80,6 +80,7 @@ class RobotLoop : TimedRobot() {
 
   override fun autonomousInit() {
     /** Every time auto starts, we update the chosen auto command. */
+    robot.pivot.currentHoming()
   }
 
   override fun autonomousPeriodic() {}
