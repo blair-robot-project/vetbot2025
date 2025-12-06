@@ -37,8 +37,6 @@ open class SwerveModuleTalonFXS(
   override val location: Translation2d
 ) : SwerveModule {
   init {
-    turnController.enableContinuousInput(.0, 2 * PI)
-    turnController.reset()
   }
 
   override val desiredState =
@@ -63,8 +61,14 @@ open class SwerveModuleTalonFXS(
       /** Ensure the module doesn't turn more than 90 degrees. */
       desState.optimize(Rotation2d(turningMotor.position.value))
 
+      turnController.setpoint = desState.angle.radians
       desiredState.speedMetersPerSecond = desState.speedMetersPerSecond
       desiredState.angle = desState.angle
+      turningMotor.setControl(
+        PositionVoltage(desiredState.angle.measure)
+          .withEnableFOC(false)
+          .withUpdateFreqHz(SwerveConstants.KRAKEN_UPDATE_RATE)
+      )
     }
 
   /** The module's [SwerveModulePosition], containing distance and angle. */

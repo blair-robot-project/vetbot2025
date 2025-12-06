@@ -120,19 +120,19 @@ open class SwerveDrive(
       desiredModuleStates,
       maxModuleSpeed
     )
-    frontLeftModule.state = desiredModuleStates[0]
+//    frontLeftModule.state = desiredModuleStates[0]
     frontRightModule.state = desiredModuleStates[1]
     backLeftModule.state = desiredModuleStates[2]
     backRightModule.state = desiredModuleStates[3]
 
-    frontLeftModule.update()
+//    frontLeftModule.update()
     frontRightModule.update()
     backLeftModule.update()
     backRightModule.update()
   }
 
   fun setVoltage(volts: Double) {
-    frontLeftModule.setVoltage(volts)
+    frontLeftModule.setVoltage(0.0)
     frontRightModule.setVoltage(volts)
     backLeftModule.setVoltage(volts)
     backRightModule.setVoltage(volts)
@@ -195,7 +195,7 @@ open class SwerveDrive(
       val frontLeftModule = createTalonFXSModule(
         "FLModule",
         SwerveConstants.DRIVE_MOTOR_FL,
-        SwerveConstants.DRIVE_INVERTED,
+        false,//SwerveConstants.DRIVE_INVERTED,
         SwerveConstants.TURN_MOTOR_FL,
         SwerveConstants.TURN_INVERTED,
         SwerveConstants.TURN_ENC_CHAN_FL,
@@ -211,7 +211,7 @@ open class SwerveDrive(
         SwerveConstants.DRIVE_MOTOR_FR,
         SwerveConstants.DRIVE_INVERTED,
         SwerveConstants.TURN_MOTOR_FR,
-        SwerveConstants.TURN_INVERTED,
+       false,// SwerveConstants.TURN_INVERTED,
         SwerveConstants.TURN_ENC_CHAN_FR,
         SwerveConstants.TURN_ENC_OFFSET_FR,
         SwerveConstants.TURN_ENC_INVERTED,
@@ -223,9 +223,9 @@ open class SwerveDrive(
       val backLeftModule = createKrakenModule(
         "BLModule",
         SwerveConstants.DRIVE_MOTOR_BL,
-        SwerveConstants.DRIVE_INVERTED,
+        true,//SwerveConstants.DRIVE_INVERTED,
         SwerveConstants.TURN_MOTOR_BL,
-        SwerveConstants.TURN_INVERTED,
+        false,// SwerveConstants.TURN_INVERTED,
         SwerveConstants.TURN_ENC_CHAN_BL,
         SwerveConstants.TURN_ENC_OFFSET_BL,
         SwerveConstants.TURN_ENC_INVERTED,
@@ -239,10 +239,10 @@ open class SwerveDrive(
         SwerveConstants.DRIVE_MOTOR_BR,
         SwerveConstants.DRIVE_INVERTED,
         SwerveConstants.TURN_MOTOR_BR,
-        SwerveConstants.TURN_INVERTED,
+       SwerveConstants.TURN_INVERTED,
         SwerveConstants.TURN_ENC_CHAN_BR,
         SwerveConstants.TURN_ENC_OFFSET_BR,
-        SwerveConstants.TURN_ENC_INVERTED,
+        false,//SwerveConstants.TURN_ENC_INVERTED,
         Translation2d(
           -SwerveConstants.WHEELBASE / 2 - SwerveConstants.X_SHIFT,
           -SwerveConstants.TRACKWIDTH / 2

@@ -106,16 +106,10 @@ open class SwerveModuleKraken(
     )
 
     /** CONTROL direction of module */
-    val turnPid =
-      turnController.calculate(
-        turnEncoder.position,
-      )
+    val frictionBypass: Double = sign(desiredState.angle.radians - turnEncoder.position) *
+      SwerveConstants.STEER_KS
 
-    turningMotor.set(
-      turnPid +
-        sign(desiredState.angle.radians - turnEncoder.position) *
-          SwerveConstants.STEER_KS,
-    )
+    turningMotor.set(turnController.calculate(turnEncoder.position) + frictionBypass)
   }
 
   companion object {
