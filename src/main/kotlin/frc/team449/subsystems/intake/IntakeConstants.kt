@@ -4,7 +4,7 @@ import edu.wpi.first.units.Units.RotationsPerSecond
 
 object IntakeConstants {
   const val INTAKE_MOTOR_ID = 11
-  const val INTAKE_MOTOR_INVERTED = false
+  const val INTAKE_MOTOR_INVERTED = true
 
   const val FUNNELER_LEADER_ID = 12
   const val FUNNELER_LEADER_INVERTED = false
@@ -17,7 +17,7 @@ object IntakeConstants {
   const val INDEXER_FOLLOWER_INVERSION = true
 
   const val CONVEYOR_ID = 9
-  const val CONVEYOR_INVERTED = false
+  const val CONVEYOR_INVERTED = true
 
   const val SHOOTER_ID = 16
   const val SHOOTER_INVERTED = false
@@ -37,7 +37,7 @@ object IntakeConstants {
   val SHOOTER_HIGH_VELOCITY = RotationsPerSecond.of(4000.0 / 60.0)
   val SHOOTER_LOW_VELOCITY = RotationsPerSecond.of(2000.0 / 60.0)
 
-  const val SHOOTER_SPINUP_TIME = 0.5 //seconds
+  const val SHOOTER_SPINUP_TIME = 0.2 //seconds
   const val SHOOTING_DEBOUNCE_TIME = 1.0 //seconds
   const val NO_SENSOR_WAIT_TIME = 2.0 //seconds
   const val RECONFIGURE_WAIT_TIME = 10.0 //seconds

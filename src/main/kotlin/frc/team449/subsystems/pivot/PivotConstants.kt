@@ -9,7 +9,7 @@ object PivotConstants {
   const val PIVOT_INVERTED = false // TODO: find
 
   const val KP = 15.5
-  const val KI = 0.0
+  const val KI = 1.0
   const val KD = 0.0
 
   // TODO(Adjust gains.)

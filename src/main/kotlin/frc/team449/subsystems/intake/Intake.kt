@@ -7,6 +7,7 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.spark.SparkMax
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.filter.Debouncer
+import edu.wpi.first.units.Units.Amps
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
@@ -100,6 +101,7 @@ class Intake(
 
   fun shoot(lowGoal: Boolean): Command {
     return Commands.sequence(
+
       runOnce {
         if (lowGoal) {
           shooterMotor.setControl(VelocityVoltage(IntakeConstants.SHOOTER_LOW_VELOCITY))
@@ -109,7 +111,9 @@ class Intake(
       },
       WaitCommand(IntakeConstants.SHOOTER_SPINUP_TIME),
       runOnce {
+        println("!! setting conveyor motor ---------------------------------------------------------")
         conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
+        println("!! setting indexer motor ---------------------------------------------------------")
         indexerMotor.setVoltage(IntakeConstants.INDEXER_VOLTAGE)
       }
     )
@@ -150,7 +154,8 @@ class Intake(
 
       val intakeMotor = createKraken(
         IntakeConstants.INTAKE_MOTOR_ID,
-        IntakeConstants.INTAKE_MOTOR_INVERTED
+        IntakeConstants.INTAKE_MOTOR_INVERTED,
+        supplyCurrentLimit = Amps.of(80.0)
       )
       val funnelerLeaderMotor = createSparkMax(
         IntakeConstants.FUNNELER_LEADER_ID,

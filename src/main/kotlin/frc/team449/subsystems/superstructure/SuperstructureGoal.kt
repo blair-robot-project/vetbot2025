@@ -13,7 +13,7 @@ object SuperstructureGoal {
   )
 
   val INTAKE = SuperstructureState(
-    Degrees.of(0.0),
+    Degrees.of(5.0),
     DriveDynamics(RobotConstants.MAX_LINEAR_SPEED, RobotConstants.MAX_ACCEL, RobotConstants.MAX_ROT_SPEED),
     "Intake"
   )

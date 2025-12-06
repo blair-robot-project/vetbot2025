@@ -28,6 +28,7 @@ class Pivot (
   private val timer = Timer()
   val positionSupplier = Supplier { motor.position }
   init {
+    println("INITNINITNINTINITINTNIINT")
     motor.setPosition(PivotConstants.TRUE_STOW_ANGLE)
   }
 
