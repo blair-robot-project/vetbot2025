@@ -19,6 +19,7 @@ import frc.team449.auto.AutoConstants
 import frc.team449.subsystems.RobotConstants
 import frc.team449.subsystems.drive.swerve.SwerveModuleKraken.Companion.createKrakenModule
 import frc.team449.subsystems.drive.swerve.SwerveModuleNEO.Companion.createNEOModule
+import frc.team449.subsystems.drive.swerve.SwerveModuleTalonFXS.Companion.createTalonFXSModule
 
 /**
  * A Swerve Drive chassis.
@@ -191,7 +192,7 @@ open class SwerveDrive(
   companion object {
     /** Create a [SwerveDrive] using [SwerveConstants]. */
     fun createSwerveKraken(field: Field2d): SwerveDrive {
-      val frontLeftModule = createKrakenModule(
+      val frontLeftModule = createTalonFXSModule(
         "FLModule",
         SwerveConstants.DRIVE_MOTOR_FL,
         SwerveConstants.DRIVE_INVERTED,

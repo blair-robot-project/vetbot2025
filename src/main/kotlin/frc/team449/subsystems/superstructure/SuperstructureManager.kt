@@ -48,25 +48,17 @@ class SuperstructureManager(
     return command
   }
 
-  fun prepIntake(): Command {
+  fun intake(): Command {
     return Commands.sequence(
       InstantCommand ({
         SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.INTAKE.driveDynamics)
         command = "moving to intake"
       }),
-      pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
+      pivot.setPosition(SuperstructureGoal.INTAKE.pivot),
       WaitUntilCommand { pivot.atSetpoint() },
       pivot.hold(),
-      InstantCommand ({ command = "nothing" })
-    )
-  }
-
-  fun intake(): Command {
-    return Commands.sequence(
-      prepIntake(),
       InstantCommand ({ command = "intaking" }),
       intake.intake(),
-      InstantCommand ({ command = "nothing" })
     )
   }
 
@@ -77,7 +69,7 @@ class SuperstructureManager(
           SuperstructureGoal.applyDriveDynamics(drive, SuperstructureGoal.STOW.driveDynamics)
           command = "stowing"
         }),
-      pivot.setPosition(SuperstructureGoal.INTAKE.pivot.`in`(Radians)),
+      pivot.setPosition(SuperstructureGoal.STOW.pivot),
       WaitUntilCommand { pivot.atSetpoint() },
       pivot.hold(),
       InstantCommand ({ command = "nothing" })
@@ -88,7 +80,6 @@ class SuperstructureManager(
     return Commands.sequence(
       InstantCommand({ command = "shooting low "}),
       intake.shoot(true),
-      InstantCommand ({ command = "nothing" })
     )
   }
 
@@ -96,7 +87,13 @@ class SuperstructureManager(
     return Commands.sequence(
       InstantCommand({ command = "shooting high "}),
       intake.shoot(false),
-      InstantCommand ({ command = "nothing" })
+    )
+  }
+
+  fun stopIntake(): Command {
+    return Commands.sequence(
+      intake.stop(),
+      InstantCommand({ command = "nothing "})
     )
   }
 

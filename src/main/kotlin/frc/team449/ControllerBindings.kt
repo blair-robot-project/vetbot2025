@@ -38,7 +38,7 @@ class ControllerBindings(
   }
 
   private fun nonRobotBindings() {
-//    slowDrive()
+    slowDrive()
     /** NOTE: If you want to see simulated vision convergence times with this function, go to simulationPeriodic in
      * RobotBase and change the passed in pose to it.simulationPeriodic to robot.drive.odometryPose
      */
@@ -68,7 +68,7 @@ class ControllerBindings(
     driveController.leftTrigger().onTrue(
       robot.superstructureManager.intake()
     ).onFalse(
-      robot.intake.stop().andThen(
+      robot.superstructureManager.stopIntake().andThen(
         robot.superstructureManager.stow()
       )
     )
@@ -77,22 +77,21 @@ class ControllerBindings(
   private fun shootLow() {
     driveController.rightBumper().onTrue(
       robot.superstructureManager.shootLow()
-        .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) }) )
-    )
+    ).onFalse(robot.intake.stop())
   }
 
   private fun shootHigh() {
     driveController.rightTrigger().onTrue(
       robot.superstructureManager.shootHigh()
-        .andThen(runOnce({ driveController.setRumble(GenericHID.RumbleType.kBothRumble, 0.25) }) )
+    ).onFalse(
+      robot.superstructureManager.stopIntake()
     )
   }
 
   private fun rejectPiece() {
     driveController.leftBumper().onTrue(
       robot.superstructureManager.rejectPiece()
-
-    )
+    ).onFalse(robot.superstructureManager.stopIntake())
   }
 
   private fun currentHome(){
@@ -104,7 +103,7 @@ class ControllerBindings(
 
   private fun slowDrive() {
     driveController
-      .rightBumper()
+      .b()
       .onTrue(
         InstantCommand({ robot.drive.maxLinearSpeed = 1.0 })
           .andThen(InstantCommand({ robot.drive.maxRotSpeed = PI / 2 })),

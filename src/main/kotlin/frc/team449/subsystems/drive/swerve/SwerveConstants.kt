@@ -47,7 +47,7 @@ object SwerveConstants {
   const val TURN_ENC_INVERTED = false
 
   /** PID gains for turning each module */
-  const val TURN_KP = 0.5
+  const val TURN_KP = 0.0 //0.5
   const val TURN_KI = 0.0
   const val TURN_KD = 0.0
 

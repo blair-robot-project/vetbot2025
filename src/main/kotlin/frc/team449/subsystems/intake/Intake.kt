@@ -2,9 +2,10 @@ package frc.team449.subsystems.intake
 
 import au.grapplerobotics.LaserCan
 import au.grapplerobotics.interfaces.LaserCanInterface
-import com.ctre.phoenix6.controls.Follower
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.spark.SparkMax
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
@@ -17,12 +18,12 @@ import frc.team449.system.motor.createFollowerSpark
 import frc.team449.system.motor.createKraken
 import frc.team449.system.motor.createSparkMax
 
+@Logged
 class Intake(
-  private val intakeLeader: TalonFX,
-  follower1: TalonFX,
-  private val firstIndexer: SparkMax,
+  private val intakeMotor: TalonFX,
+  private val funnelerMotor: SparkMax,
   follower2: SparkMax,
-  private val secondIndexer: SparkMax,
+  private val indexerMotor: SparkMax,
   follower3: SparkMax,
   private val conveyorMotor: SparkMax,
   private val shooterMotor: TalonFX,
@@ -32,46 +33,46 @@ class Intake(
   ): SubsystemBase() {
   private val timer = Timer()
   private val shootingDebouncer = Debouncer(IntakeConstants.SHOOTING_DEBOUNCE_TIME, Debouncer.DebounceType.kFalling)
-
-  private val sensors =
-    listOf(
-      leftSensor,
-      rightSensor,
-      shooterSensor,
-    )
-
-  private var allSensorsConfigured = true
-  private var intakingSensorDown = false
-  private var shootingSensorDown = false
-  private var lasercanConfigured = listOf<Boolean>()
-  var pieces = 0
-
-  private fun configureSensors() {
-    allSensorsConfigured = true
-    intakingSensorDown = false
-    shootingSensorDown = false
-    lasercanConfigured = listOf<Boolean>()
-    try {
-      for (sensor in sensors) {
-        sensor.setTimingBudget(LaserCanInterface.TimingBudget.TIMING_BUDGET_33MS)
-        sensor.setRegionOfInterest(LaserCanInterface.RegionOfInterest(8, 8, 4, 4))
-        sensor.setRangingMode(LaserCanInterface.RangingMode.SHORT)
-        lasercanConfigured.plus(true)
-      }
-    } catch (_: Exception) {
-      lasercanConfigured.plus(false)
-      allSensorsConfigured = false
-    }
-    if((lasercanConfigured.size < 3) || !lasercanConfigured[2]) {
-      shootingSensorDown = true
-    }
-    if((lasercanConfigured.size < 2) || !(lasercanConfigured[0] && lasercanConfigured[1])) { //DEMORGANSSSS
-      intakingSensorDown = true
-    }
-  }
+//
+//  private val sensors =
+//    listOf(
+//      leftSensor,
+//      rightSensor,
+//      shooterSensor,
+//    )
+//
+//  private var allSensorsConfigured = true
+//  private var intakingSensorDown = false
+//  private var shootingSensorDown = false
+//  private var lasercanConfigured = arrayOf<Boolean>()
+//
+//  private fun configureSensors() {
+//    allSensorsConfigured = true
+//    intakingSensorDown = false
+//    shootingSensorDown = false
+//    lasercanConfigured = arrayOf<Boolean>()
+//    try {
+//      for (sensor in sensors) {
+//        sensor.setTimingBudget(LaserCanInterface.TimingBudget.TIMING_BUDGET_33MS)
+//        sensor.setRegionOfInterest(LaserCanInterface.RegionOfInterest(8, 8, 4, 4))
+//        sensor.setRangingMode(LaserCanInterface.RangingMode.SHORT)
+//        lasercanConfigured += true
+//      }
+//    } catch (_: Exception) {
+//      lasercanConfigured += false
+//      allSensorsConfigured = false
+//    }
+//    if((lasercanConfigured.size < 3) || !lasercanConfigured[2]) {
+//      shootingSensorDown = true
+//    }
+//    if((lasercanConfigured.size < 2) || !(lasercanConfigured[0] && lasercanConfigured[1])) { //DEMORGANSSSS
+//      intakingSensorDown = true
+//    }
+//    timer.reset()
+//  }
 
   init {
-    configureSensors()
+//    configureSensors()
     timer.start()
   }
 
@@ -90,19 +91,10 @@ class Intake(
   fun intake(): Command {
     return Commands.sequence(
       runOnce {
-        intakeLeader.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
-        firstIndexer.setVoltage(IntakeConstants.FIRST_INDEXER_VOLTAGE)
+        intakeMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
+        funnelerMotor.setVoltage(IntakeConstants.FUNNELER_VOLTAGE)
         conveyorMotor.setVoltage(IntakeConstants.CONVEYOR_INTAKE_VOLTAGE)
-      },
-      ConditionalCommand (
-        Commands.sequence(
-          WaitUntilCommand { pieceIntaken() },
-          WaitCommand(0.5),
-        ),
-        WaitCommand(IntakeConstants.NO_SENSOR_WAIT_TIME)
-      ) { !intakingSensorDown },
-      stop(),
-      runOnce { pieces++ }
+      }
     )
   }
 
@@ -110,39 +102,25 @@ class Intake(
     return Commands.sequence(
       runOnce {
         if (lowGoal) {
-          shooterMotor.setVoltage(IntakeConstants.SHOOTER_LOW_VOLTAGE)
+          shooterMotor.setControl(VelocityVoltage(IntakeConstants.SHOOTER_LOW_VELOCITY))
         } else {
-          shooterMotor.setVoltage(IntakeConstants.SHOOTER_HIGH_VOLTAGE)
+          shooterMotor.setControl(VelocityVoltage(IntakeConstants.SHOOTER_HIGH_VELOCITY))
         }
       },
       WaitCommand(IntakeConstants.SHOOTER_SPINUP_TIME),
       runOnce {
         conveyorMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
-        secondIndexer.setVoltage(IntakeConstants.SECOND_INDEXER_VOLTAGE)
-      },
-      ConditionalCommand(
-        Commands.sequence(
-          WaitUntilCommand { piecesShot() },
-          WaitUntilCommand { shootingDebouncer.calculate(!piecesShot())} // falling edge
-        ),
-        WaitCommand(IntakeConstants.NO_SENSOR_WAIT_TIME),
-        { !shootingSensorDown }
-      ),
-      stop(),
-      runOnce { pieces = 0 }
+        indexerMotor.setVoltage(IntakeConstants.INDEXER_VOLTAGE)
+      }
     )
   }
 
   fun reject(): Command {
-    return Commands.sequence(
-      runOnce {
-        intakeLeader.setVoltage(-IntakeConstants.INTAKE_VOLTAGE)
-        firstIndexer.setVoltage(-IntakeConstants.FIRST_INDEXER_VOLTAGE)
+    return runOnce {
+        intakeMotor.setVoltage(-IntakeConstants.INTAKE_VOLTAGE)
+        funnelerMotor.setVoltage(-IntakeConstants.FUNNELER_VOLTAGE)
         conveyorMotor.setVoltage(-IntakeConstants.CONVEYOR_INTAKE_VOLTAGE)
-      },
-      WaitCommand(2.0),
-      stop()
-    )
+    }
   }
 
   fun piecesShot(): Boolean {
@@ -152,54 +130,46 @@ class Intake(
   fun stop(): Command {
     return runOnce {
       conveyorMotor.stopMotor()
-      intakeLeader.stopMotor()
-      firstIndexer.stopMotor()
-      secondIndexer.stopMotor()
+      intakeMotor.stopMotor()
+      funnelerMotor.stopMotor()
+      indexerMotor.stopMotor()
       shooterMotor.stopMotor()
-    }.withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
+    }
   }
 
   override fun periodic() {
-    if (!allSensorsConfigured && timer.hasElapsed(IntakeConstants.RECONFIGURE_WAIT_TIME)) {
-      //will shortcircuit if all configured so don't worry about expensive calc with has elapsed
-      //retry configuring sensors
-      configureSensors()
-    }
+//    if (!allSensorsConfigured && timer.hasElapsed(IntakeConstants.RECONFIGURE_WAIT_TIME)) {
+//      //will shortcircuit if all configured so don't worry about expensive calc with has elapsed
+//      //retry configuring sensors
+//      configureSensors()
+//    }
   }
 
   companion object {
     fun createIntake(): Intake {
 
-      val intakeLeader = createKraken(
-        IntakeConstants.INTAKE_LEADER_ID,
-        IntakeConstants.INTAKE_LEADER_INVERTED
+      val intakeMotor = createKraken(
+        IntakeConstants.INTAKE_MOTOR_ID,
+        IntakeConstants.INTAKE_MOTOR_INVERTED
+      )
+      val funnelerLeaderMotor = createSparkMax(
+        IntakeConstants.FUNNELER_LEADER_ID,
+        IntakeConstants.FUNNELER_LEADER_INVERTED,
+      )
+      val funnelerFollowerMotor = createFollowerSpark(
+        IntakeConstants.FUNNELER_FOLOWER_ID,
+        funnelerLeaderMotor,
+        IntakeConstants.FUNNELER_FOLLOWER_INVERSION,
       )
 
-      val intakeFollower = TalonFX(
-        IntakeConstants.INTAKE_FOLLOWER_ID
+      val indexerLeaderMotor = createSparkMax(
+        IntakeConstants.INDEXER_LEADER_ID,
+        IntakeConstants.INDEXER_LEADER_INVERTED,
       )
-      intakeFollower.setControl(
-        Follower(IntakeConstants.INTAKE_LEADER_ID, IntakeConstants.INTAKE_FOLLOWER_INVERSION)
-      )
-
-      val firstIndexerLeaderMotor = createSparkMax(
-        IntakeConstants.FIRST_INDEXER_LEADER_ID,
-        IntakeConstants.FIRST_INDEXER_LEADER_INVERTED,
-      )
-      val firstIndexerFollowerMotor = createFollowerSpark(
-        IntakeConstants.FIRST_INDEXER_FOLLOWER_ID,
-        firstIndexerLeaderMotor,
-        IntakeConstants.FIRST_INDEXER_FOLLOWER_INVERSION,
-      )
-
-      val secondIndexerLeaderMotor = createSparkMax(
-        IntakeConstants.SECOND_INDEXER_LEADER_ID,
-        IntakeConstants.SECOND_INDEXER_LEADER_INVERTED,
-      )
-      val secondIndexerFollowerMotor = createFollowerSpark(
-        IntakeConstants.SECOND_INDEXER_FOLLOWER_ID,
-        secondIndexerLeaderMotor,
-        IntakeConstants.SECOND_INDEXER_FOLLOWER_INVERSION,
+      val indexerFollowerMotor = createFollowerSpark(
+        IntakeConstants.INDEXER_FOLLOWER_ID,
+        indexerLeaderMotor,
+        IntakeConstants.INDEXER_FOLLOWER_INVERSION,
       )
 
       val conveyorMotor = createSparkMax(
@@ -223,12 +193,11 @@ class Intake(
       )
 
       return Intake(
-        intakeLeader,
-        intakeFollower,
-        firstIndexerLeaderMotor,
-        firstIndexerFollowerMotor,
-        secondIndexerLeaderMotor,
-        secondIndexerFollowerMotor,
+        intakeMotor,
+        funnelerLeaderMotor,
+        funnelerFollowerMotor,
+        indexerLeaderMotor,
+        indexerFollowerMotor,
         conveyorMotor,
         shooterMotor,
         rightSensor,

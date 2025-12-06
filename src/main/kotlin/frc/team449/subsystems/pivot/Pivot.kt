@@ -10,6 +10,7 @@ import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.team449.system.motor.createKraken
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.Angle
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
@@ -25,40 +26,53 @@ class Pivot (
 ) : SubsystemBase() {
 
   private val timer = Timer()
-  val positionSupplier = Supplier { motor.position.valueAsDouble }
+  val positionSupplier = Supplier { motor.position }
   init {
     motor.setPosition(PivotConstants.TRUE_STOW_ANGLE)
   }
 
-  private val request: MotionMagicVoltage = MotionMagicVoltage(
-    SuperstructureGoal.STOW.pivot.`in`(Radians)
+  private val request: PositionVoltage = PositionVoltage(
+    SuperstructureGoal.STOW.pivot
   ).withEnableFOC(false)
 
-  fun setPosition(position: Double): Command {
-    return Commands.sequence(
-      runOnce {
-        val config = TalonFXConfiguration()
-        if(position < positionSupplier.get()) {
-          config.MotorOutput.NeutralMode = NeutralModeValue.Coast
-        } else {
-          config.MotorOutput.NeutralMode = NeutralModeValue.Brake
-        }
-        motor.configurator.apply(config)
-      },
-      runOnce {
-        motor.setControl(
+  @get:Logged
+  val target: Double
+    get() {
+      return request.Position
+    }
+
+  fun setPosition(position: Angle): Command {
+//    return Commands.sequence(
+//      runOnce {
+//        val config = TalonFXConfiguration()
+//        if(position < positionSupplier.get().value) {
+//          config.MotorOutput.NeutralMode = NeutralModeValue.Coast
+//        } else {
+//          config.MotorOutput.NeutralMode = NeutralModeValue.Brake
+//        }
+//        motor.configurator.apply(config)
+//      },
+//      runOnce {
+//        motor.setControl(
+//          request
+//              .withPosition(position)
+//              .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
+//        )
+//      }
+//    )
+    return runOnce {
+      motor.setControl(
           request
               .withPosition(position)
-              .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
-        )
-      }
-    ).withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
+              //.withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
+      )
+    }
   }
 
   fun hold(): Command {
     return this.runOnce {
       motor.setControl(
-        PositionVoltage(positionSupplier.get())
+        PositionVoltage(positionSupplier.get().value)
           .withUpdateFreqHz(PivotConstants.REQUEST_UPDATE_RATE)
       )
     }
@@ -93,7 +107,7 @@ class Pivot (
   }
 
   fun atSetpoint(): Boolean {
-    return (abs(motor.position.valueAsDouble - request.Position) < PivotConstants.TOLERANCE.`in`(Radians))
+    return (abs(motor.position.valueAsDouble - request.Position) < PivotConstants.TOLERANCE.`in`(Rotations))
   }
 
   fun stop(): Command {
@@ -115,7 +129,8 @@ class Pivot (
         kD = PivotConstants.KD,
         gravityType = GravityTypeValue.Arm_Cosine,
         cruiseVel = PivotConstants.PIVOT_CRUISE_VEL.`in`(RotationsPerSecond),
-        maxAccel = PivotConstants.PIVOT_MAX_ACCEL.`in`(RotationsPerSecondPerSecond)
+        maxAccel = PivotConstants.PIVOT_MAX_ACCEL.`in`(RotationsPerSecondPerSecond),
+        sensorToMech = PivotConstants.PIVOT_SENSOR_TO_MECH
       )
       return Pivot(pivotMotor)
     }
